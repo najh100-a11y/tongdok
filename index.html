@@ -777,7 +777,7 @@ main>section+section{border-top:1px solid var(--rule)}
   }
 
   load(); applySize();
-  fetch('data/january.json')
+  fetch('data/january.json', { cache: 'no-cache' })
     .then(function (r) { if (!r.ok) { throw new Error('plan'); } return r.json(); })
     .then(function (p) { plan = p; start(); })
     .catch(function () {
