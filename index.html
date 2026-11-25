@@ -5,7 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>진실한숲 통독</title>
-<link rel="icon" href="data:,">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="진숲 통독">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#F5F7F2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111613" media="(prefers-color-scheme: dark)">
 <style>
 /* One reading column, 640px at most, left-aligned. Everything meant to be read is
    set in the serif; dates, buttons and labels are set in the sans. One accent (leaf)
@@ -195,6 +202,18 @@ main>section+section{border-top:1px solid var(--rule)}
 .member-list .n{flex:1;font-size:.9375rem}
 .member-list .s{font-size:.75rem;color:var(--ink-soft)}
 .member-list button{min-height:36px;padding:0 12px;border:1px solid var(--rule);border-radius:10px;background:none;font-size:.8125rem}
+/* install guide */
+.install{margin:18px 0 0;padding:16px 18px;border:1px solid var(--rule);border-radius:16px;background:var(--surface)}
+.install .lead{margin:0 0 12px;font-size:.9375rem;line-height:1.65;word-break:keep-all}
+.install .head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.install .head img{width:40px;height:40px;border-radius:10px;flex:none}
+.install .head b{display:block;font-size:1rem;font-weight:600}
+.install .head span{display:block;font-size:.8125rem;color:var(--ink-soft);word-break:keep-all}
+.install ol{margin:0 0 4px;padding-left:1.3em;font-size:.9375rem;line-height:1.7;word-break:keep-all}
+.install ol li+li{margin-top:2px}
+.install .solid{margin-top:4px}
+.install .row2{display:flex;justify-content:flex-end;margin-top:8px}
+.install .later{min-height:40px;padding:0 4px;border:0;background:none;font-size:.875rem;color:var(--ink-soft);text-decoration:underline;text-underline-offset:3px}
 .back{display:inline-flex;align-items:center;gap:6px;min-height:40px;margin-top:18px;padding:0;border:0;background:none;font-size:.875rem;color:var(--ink-soft)}
 
 /* Sunday */
@@ -328,6 +347,137 @@ main>section+section{border-top:1px solid var(--rule)}
       return s && byDate[s] ? s : null;
     } catch (e) { return null; }
   }
+  /* ---------- install as an app ----------
+     Chrome/Edge/Samsung give a real install prompt (beforeinstallprompt). iPhone, iPad and
+     Mac Safari have no prompt, so we show the menu steps. KakaoTalk's in-app browser cannot
+     install at all, so we offer to reopen the page in the phone's own browser. */
+  var INSTALL_KEY = 'jinsup-tongdok-install';
+  var install = { prompt: null };
+  var UA = navigator.userAgent || '';
+  var ENV = (function () {
+    var ios = /iPhone|iPad|iPod/.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1);
+    var android = /Android/.test(UA);
+    return {
+      kakao: /KAKAOTALK/i.test(UA),
+      ios: ios,
+      android: android,
+      macSafari: !ios && /Macintosh/.test(UA) && /Safari/.test(UA) && !/Chrome|Chromium|Edg|Firefox|OPR/.test(UA),
+      mobile: ios || android
+    };
+  })();
+  function standalone() {
+    try { if (window.matchMedia('(display-mode: standalone)').matches) { return true; } } catch (e) { /* ignore */ }
+    return window.navigator.standalone === true;
+  }
+  function installState() {
+    try { return JSON.parse(window.localStorage.getItem(INSTALL_KEY) || '{}'); } catch (e) { return {}; }
+  }
+  function setInstallState(o) {
+    try { window.localStorage.setItem(INSTALL_KEY, JSON.stringify(o)); } catch (e) { /* ignore */ }
+  }
+  function installCardWanted() {
+    if (standalone()) { return false; }
+    var st = installState();
+    if (st.installed) { return false; }
+    return !(st.later && Date.now() - st.later < 7 * 24 * 3600 * 1000);
+  }
+  window.addEventListener('beforeinstallprompt', function (ev) {
+    ev.preventDefault(); install.prompt = ev; refreshInstallCards();
+  });
+  window.addEventListener('appinstalled', function () {
+    install.prompt = null; setInstallState({ installed: Date.now() }); refreshInstallCards();
+  });
+  function steps(list) {
+    var ol = el('ol');
+    list.forEach(function (t) { ol.appendChild(el('li', null, t)); });
+    return ol;
+  }
+  function installBody(box) {
+    if (ENV.kakao) {
+      box.appendChild(el('p', 'lead', '카카오톡 안에서 열린 화면에서는 앱으로 설치할 수 없습니다. 휴대폰의 기본 브라우저로 열어서 설치해 주세요.'));
+      var ob = el('button', 'solid', '기본 브라우저로 열기'); ob.type = 'button';
+      ob.addEventListener('click', function () {
+        window.location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(window.location.origin + window.location.pathname);
+      });
+      box.appendChild(ob);
+      box.appendChild(el('p', 'hint', ENV.ios
+        ? '버튼이 듣지 않으면 화면 아래의 공유 버튼을 눌러 Safari로 열어 주세요.'
+        : '버튼이 듣지 않으면 화면 아래의 ⋮ 메뉴에서 "다른 브라우저로 열기"를 눌러 주세요.'));
+      return;
+    }
+    if (install.prompt) {
+      var ib = el('button', 'solid', '앱 설치하기'); ib.type = 'button';
+      ib.addEventListener('click', function () {
+        var pr = install.prompt; if (!pr) { return; }
+        pr.prompt();
+        pr.userChoice.then(function (c) {
+          install.prompt = null;
+          if (c && c.outcome === 'accepted') { setInstallState({ installed: Date.now() }); }
+          refreshInstallCards();
+        }).catch(function () {});
+      });
+      box.appendChild(ib);
+      return;
+    }
+    if (ENV.ios) {
+      box.appendChild(steps([
+        '공유 버튼(네모에서 화살표가 위로 나온 모양)을 누릅니다. 보이지 않으면 주소창 옆 ··· 버튼을 먼저 누르세요.',
+        '목록을 내려 "홈 화면에 추가"를 누릅니다.',
+        '"웹 앱으로 열기"가 보이면 켜 둔 채로 "추가"를 누릅니다.'
+      ]));
+      return;
+    }
+    if (ENV.android) {
+      box.appendChild(steps([
+        '브라우저 메뉴(⋮)를 엽니다.',
+        '"앱 설치"나 "홈 화면에 추가"를 누르고, 안내에 따라 "설치"를 누릅니다.'
+      ]));
+      return;
+    }
+    if (ENV.macSafari) {
+      box.appendChild(steps([
+        'Safari 도구 막대의 공유 버튼을 누릅니다.',
+        '"Dock에 추가"를 누릅니다. macOS Sonoma 이후 버전에서 쓸 수 있습니다.'
+      ]));
+      return;
+    }
+    box.appendChild(steps([
+      '크롬이나 엣지에서 이 화면을 엽니다.',
+      '주소창 오른쪽의 설치 아이콘을 누르거나, 브라우저 메뉴에서 "앱 설치" 항목을 찾아 누릅니다.'
+    ]));
+  }
+  function installCard(withLater) {
+    var box = el('div', 'install'); box.setAttribute('data-install', withLater ? 'top' : 'acct');
+    var head = el('div', 'head');
+    var img = el('img'); img.src = 'icons/icon-192.png'; img.alt = '';
+    var tx = el('div');
+    tx.appendChild(el('b', null, '앱으로 설치하기'));
+    tx.appendChild(el('span', null, '홈 화면에 두면 날마다 앱처럼 바로 열 수 있습니다.'));
+    head.appendChild(img); head.appendChild(tx);
+    box.appendChild(head);
+    installBody(box);
+    if (!ENV.kakao) {
+      box.appendChild(el('p', 'hint', '설치한 앱을 처음 열 때 카카오 로그인을 한 번 더 해야 할 수 있습니다.'));
+    }
+    if (withLater) {
+      var row = el('div', 'row2');
+      var later = el('button', 'later', '나중에'); later.type = 'button';
+      later.addEventListener('click', function () {
+        var st = installState(); st.later = Date.now(); setInstallState(st); box.remove();
+      });
+      row.appendChild(later); box.appendChild(row);
+    }
+    return box;
+  }
+  function refreshInstallCards() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-install]'), function (old) {
+      var top = old.getAttribute('data-install') === 'top';
+      if (top && !installCardWanted()) { old.remove(); return; }
+      if (!top && standalone()) { old.remove(); return; }
+      old.parentNode.replaceChild(installCard(top), old);
+    });
+  }
+
   function accessToken() {
     if (!sb) { return Promise.resolve(null); }
     return sb.auth.getSession().then(function (r) {
@@ -917,6 +1067,12 @@ main>section+section{border-top:1px solid var(--rule)}
     back.addEventListener('click', function () { go(current); });
     hero.appendChild(back);
     main.appendChild(hero);
+    if (!standalone()) {
+      var si = section('write', '앱으로 설치');
+      si.appendChild(installCard(false));
+      si.lastChild.style.marginTop = '0';
+      main.appendChild(si);
+    }
 
     if (!isMember()) {
       var s0 = section('write', signedIn() ? '교인 등록' : '로그인');
@@ -1024,6 +1180,7 @@ main>section+section{border-top:1px solid var(--rule)}
     main.textContent = '';
 
     var hero = el('section', 'hero');
+    if (installCardWanted()) { hero.appendChild(installCard(true)); hero.lastChild.style.margin = '0 0 22px'; }
     hero.appendChild(el('p', 'section-name', day.section));
     hero.appendChild(el('h1', null, day.ref));
     var pr = el('div', 'progress');
@@ -1216,6 +1373,9 @@ main>section+section{border-top:1px solid var(--rule)}
   }
 
   load(); applySize();
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+  }
   var authReady = initAuth().catch(function () {});
   fetch('data/january.json', { cache: 'no-cache' })
     .then(function (r) { if (!r.ok) { throw new Error('plan'); } return r.json(); })
