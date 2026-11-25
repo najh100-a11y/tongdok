@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>진실한숲 통독</title>
+<link rel="icon" href="data:,">
+<style>
+/* One reading column, 640px at most, left-aligned. Everything meant to be read is
+   set in the serif; dates, buttons and labels are set in the sans. One accent (leaf)
+   marks what the reader acts on: today, the key verse, footnotes, 읽었어요. */
+@font-face{font-family:"RIDIBatang";src:url("fonts/RIDIBatang.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Pretendard";src:url("fonts/Pretendard-Regular.subset.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Pretendard";src:url("fonts/Pretendard-Medium.subset.woff2") format("woff2");font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:"Pretendard";src:url("fonts/Pretendard-SemiBold.subset.woff2") format("woff2");font-weight:600;font-style:normal;font-display:swap}
+
+:root{
+  --paper:#F5F7F2;
+  --surface:#FFFFFF;
+  --ink:#17201B;
+  --ink-soft:#57625B;
+  --rule:#DADFD6;
+  --leaf:#2C5E47;
+  --leaf-wash:#E2ECE3;
+  --on-leaf:#FFFFFF;
+  --font-read:"RIDIBatang","Noto Serif KR","AppleMyungjo","Batang",serif;
+  --font-ui:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+  --read:1.0625rem;
+  --gutter:22px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#111613;--surface:#181E1A;--ink:#E4EAE4;--ink-soft:#9CA79F;--rule:#2A332D;
+    --leaf:#8FC7A8;--leaf-wash:#1D2A22;--on-leaf:#0F1612;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#111613;--surface:#181E1A;--ink:#E4EAE4;--ink-soft:#9CA79F;--rule:#2A332D;
+  --leaf:#8FC7A8;--leaf-wash:#1D2A22;--on-leaf:#0F1612;color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-ui);font-size:1rem;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--leaf);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.app{max-width:640px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:4px;padding:10px 12px 6px}
+.top .date{flex:1;text-align:center;font-weight:600;font-size:1rem;letter-spacing:-0.01em;font-variant-numeric:tabular-nums}
+.icon-btn{width:44px;height:44px;display:grid;place-items:center;border:0;background:none;border-radius:12px;color:var(--ink)}
+.icon-btn:disabled{opacity:.28;cursor:default}
+.icon-btn svg{width:20px;height:20px}
+.size-btn{display:block;width:48px;line-height:44px;text-align:center;white-space:nowrap;font-family:var(--font-read)}
+.size-btn .a{font-size:.8125rem}
+.size-btn .b{font-size:1.1875rem;margin-left:1px}
+
+/* week strip */
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:0 var(--gutter) 14px;border-bottom:1px solid var(--rule)}
+.day{display:grid;justify-items:center;gap:1px;padding:7px 0 6px;border:1px solid transparent;border-radius:12px;background:none;min-width:0}
+.day .w{font-size:.6875rem;color:var(--ink-soft)}
+.day .d{font-size:.9375rem;font-weight:500;font-variant-numeric:tabular-nums}
+.day .dot{width:5px;height:5px;border-radius:50%;margin-top:2px;background:transparent}
+.day.is-read .dot{background:var(--leaf)}
+.day.is-current{background:var(--surface);border-color:var(--rule)}
+.day.is-current .d{color:var(--leaf);font-weight:600}
+.day.is-rest .d{color:var(--ink-soft)}
+.day:disabled{opacity:.3;cursor:default}
+
+/* reading column */
+main{flex:1;padding:0 var(--gutter)}
+main>section{padding:28px 0}
+main>section+section{border-top:1px solid var(--rule)}
+.label{margin:0 0 12px;font-size:.8125rem;font-weight:600;color:var(--ink-soft);letter-spacing:0}
+.read{font-family:var(--font-read);font-synthesis:none;font-size:var(--read);line-height:1.9;letter-spacing:-0.01em;word-break:keep-all;overflow-wrap:break-word}
+.read p{margin:0 0 .9em}
+.read p:last-child{margin-bottom:0}
+
+.hero{padding-top:26px}
+.hero .section-name{margin:0 0 6px;font-size:.875rem;color:var(--ink-soft)}
+.hero h1{margin:0;font-family:var(--font-read);font-synthesis:none;font-weight:400;font-size:clamp(1.9rem,7.4vw,2.5rem);line-height:1.25;letter-spacing:-0.02em;word-break:keep-all;text-wrap:balance}
+.progress{display:flex;align-items:center;gap:12px;margin-top:18px}
+.progress .bar{flex:1;height:3px;border-radius:2px;background:var(--rule);overflow:hidden}
+.progress .bar i{display:block;height:100%;min-width:3px;background:var(--leaf)}
+.progress span{font-size:.8125rem;color:var(--ink-soft);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.guide h2{margin:0 0 14px;font-family:var(--font-read);font-synthesis:none;font-weight:400;font-size:1.4375rem;line-height:1.4;letter-spacing:-0.015em;word-break:keep-all;text-wrap:balance}
+
+/* scripture */
+.scripture-head{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+.scripture-head .label{margin:0}
+.scripture-head .ver{font-size:.8125rem;color:var(--ink-soft)}
+.text-btn{margin-left:auto;border:0;background:none;padding:8px 0 8px 12px;font-size:.875rem;font-weight:500;color:var(--leaf)}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0}
+.tab{min-height:36px;padding:0 15px;border:1px solid var(--rule);border-radius:999px;background:none;font-size:.875rem;font-weight:500;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.tab[aria-pressed="true"]{border-color:var(--leaf);background:var(--leaf-wash);color:var(--leaf)}
+.passage{padding-top:20px;min-height:9rem}
+.passage h3{margin:0 0 10px;font-family:var(--font-read);font-synthesis:none;font-weight:400;font-size:1.1875rem;letter-spacing:-0.01em}
+.passage h3:focus{outline:none}
+.pb .para{margin:0 0 .9em}
+.pb .pi{padding-left:1.2em}
+.pb .sh{margin:1.5em 0 .45em;font-family:var(--font-ui);font-size:.875rem;font-weight:600;line-height:1.5;color:var(--ink);letter-spacing:-0.01em;word-break:keep-all}
+.pb .sh:first-child{margin-top:.2em}
+.pb .r{margin:-.2em 0 .6em;font-family:var(--font-ui);font-size:.8125rem;color:var(--ink-soft)}
+.pb .d{margin:0 0 .7em;font-size:.9375em;color:var(--ink-soft)}
+.pb .q{margin:0 0 .12em;padding-left:1.4em;text-indent:-1.4em}
+.pb .q2{padding-left:2.8em}
+.pb .q3{padding-left:4.2em}
+.pb .q+.para,.pb .q+.sh,.pb .para+.q,.pb .d+.q{margin-top:.75em}
+.pb .b{height:.75em}
+.vn{position:relative;top:-.48em;margin:0 .22em 0 .06em;font-family:var(--font-ui);font-size:.62em;font-weight:500;line-height:0;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.fn{position:relative;top:-.48em;margin:0 .1em;padding:0 .14em;border:0;background:none;font-family:var(--font-ui);font-size:.62em;font-weight:600;line-height:1;color:var(--leaf);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
+.fn::after{content:"";position:absolute;inset:-12px -8px}
+.fn[aria-expanded="true"]{text-decoration:none;background:var(--leaf-wash);border-radius:3px}
+.note{margin:-.35em 0 .9em;padding:10px 14px;border-radius:12px;background:var(--leaf-wash);font-family:var(--font-ui);font-size:.875rem;line-height:1.65;color:var(--ink);word-break:keep-all;overflow-wrap:break-word}
+.note b{margin-right:.45em;font-weight:600;color:var(--leaf);font-variant-numeric:tabular-nums}
+.kv{background:var(--leaf-wash);border-radius:3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.next-ch{width:100%;min-height:48px;margin-top:20px;border:1px solid var(--rule);border-radius:14px;background:var(--surface);font-size:.9375rem;font-weight:600;color:var(--leaf)}
+.attrib{margin-top:24px;padding-top:14px;border-top:1px solid var(--rule);font-size:.75rem;line-height:1.7;color:var(--ink-soft)}
+.attrib p{margin:0}
+.attrib a{color:var(--leaf);text-underline-offset:3px}
+.links{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:12px}
+.links a{display:inline-block;padding:4px 0;font-size:.875rem;color:var(--leaf);text-underline-offset:3px}
+.state{margin:6px 0 0;font-size:.9375rem;line-height:1.65;color:var(--ink-soft);word-break:keep-all}
+.state .btn{margin-top:12px}
+
+.key blockquote{margin:0;padding:2px 0 2px 16px;border-left:2px solid var(--leaf)}
+.key cite{display:block;margin-top:10px;font-family:var(--font-ui);font-style:normal;font-size:.8125rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.key .go{margin-top:12px}
+
+.extra h3{margin:0 0 8px;font-family:var(--font-read);font-synthesis:none;font-weight:400;font-size:1.125rem}
+.extra .src{margin-top:12px;font-size:.8125rem;line-height:1.7;color:var(--ink-soft)}
+.extra .src a{color:inherit;text-underline-offset:3px}
+.pilot{margin-left:6px;font-weight:500;color:var(--ink-soft)}
+
+/* writing areas */
+.write textarea{display:block;width:100%;min-height:92px;padding:12px 14px;border:1px solid var(--rule);border-radius:14px;background:var(--surface);resize:vertical;font-size:1rem;line-height:1.6}
+.write textarea::placeholder{color:var(--ink-soft)}
+.write .row{display:flex;justify-content:flex-end;margin-top:10px}
+.btn{min-height:44px;padding:0 18px;border:1px solid var(--leaf);border-radius:12px;background:none;color:var(--leaf);font-size:.9375rem;font-weight:600}
+.posts{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:10px}
+.posts li{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:var(--leaf-wash)}
+.posts p{flex:1;margin:0;font-size:.9375rem;line-height:1.65;white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere}
+.posts button{border:0;background:none;padding:2px 0;font-size:.8125rem;color:var(--ink-soft);text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+.hint{margin:10px 0 0;font-size:.8125rem;color:var(--ink-soft);word-break:keep-all}
+
+/* Sunday */
+.rest-list{list-style:none;margin:0;padding:0}
+.rest-list li{display:flex;align-items:baseline;gap:12px;padding:11px 0;border-bottom:1px solid var(--rule)}
+.rest-list li:last-child{border-bottom:0}
+.rest-list .w{width:1.5rem;font-size:.8125rem;color:var(--ink-soft)}
+.rest-list .r{flex:1;font-family:var(--font-read);font-size:1.0625rem}
+.rest-list .s{font-size:.8125rem;color:var(--ink-soft)}
+.rest-list .s.done{color:var(--leaf);font-weight:600}
+
+.credits{padding:8px var(--gutter) 22px;font-size:.75rem;line-height:1.7;color:var(--ink-soft);word-break:keep-all}
+.credits p{margin:0 0 6px}
+
+/* bottom action */
+.dock{position:sticky;bottom:0;padding:12px var(--gutter) 14px;background:linear-gradient(to top,var(--paper) 72%,transparent)}
+.read-btn{width:100%;height:54px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--leaf);border-radius:16px;background:var(--leaf);color:var(--on-leaf);font-size:1.0625rem;font-weight:600;letter-spacing:-0.01em}
+.read-btn svg{width:20px;height:20px;display:none}
+.read-btn[aria-pressed="true"]{background:var(--leaf-wash);color:var(--leaf)}
+.read-btn[aria-pressed="true"] svg{display:block}
+.read-btn[aria-pressed="true"] svg path{stroke-dasharray:24;stroke-dashoffset:0;animation:draw .28s ease-out}
+@keyframes draw{from{stroke-dashoffset:24}to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){.read-btn[aria-pressed="true"] svg path{animation:none}}
+[hidden]{display:none!important}
+.status{padding:60px var(--gutter);color:var(--ink-soft)}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <button class="icon-btn" id="prev" type="button" aria-label="전날">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="date" id="dateLabel" aria-live="polite"></div>
+    <button class="icon-btn" id="next" type="button" aria-label="다음 날">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+    </button>
+    <button class="icon-btn size-btn" id="size" type="button" aria-label="글자 크기 바꾸기"><span class="a">가</span><span class="b">가</span></button>
+  </header>
+  <nav class="week" id="week" aria-label="이번 주 본문"></nav>
+  <main id="main"><p class="status">불러오는 중입니다.</p></main>
+  <footer class="credits">
+    <p>시안입니다. 읽음 표시와 나눔, 질문은 아직 이 기기에만 저장되고 다른 사람에게 보이지 않습니다. 2027년 1월 날짜만 넘겨 볼 수 있습니다. 가이드와 읽을거리는 목회자 검토 전의 초안입니다.</p>
+    <p>앱 안의 본문은 현대인의 성경입니다. Biblica의 허락을 받아 YouVersion Platform을 통해 싣고, 장마다 저작권 표시를 함께 보여 줍니다.</p>
+    <p>이 화면에는 리디주식회사에서 제공한 리디바탕 글꼴과 Pretendard 글꼴이 사용되어 있습니다.</p>
+  </footer>
+  <div class="dock" id="dock" hidden>
+    <button class="read-btn" id="readBtn" type="button" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      <span>읽었어요</span>
+    </button>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var KEY = 'jinsup-tongdok-v1';
+  var WD = ['일', '월', '화', '수', '목', '금', '토'];
+  var SIZES = ['1.0625rem', '1.1875rem', '1.3125rem'];
+
+  // 본문은 Supabase 함수(passage)를 거쳐 한 장씩 받아 온다. 아래 키는 공개용(publishable) 키다.
+  var FN_URL = 'https://khxwbstnhiimwcdchtjy.supabase.co/functions/v1/passage';
+  var FN_KEY = 'sb_publishable_guI7qU59guL54deM5ukSTQ_NNkQX8hZ';
+  var BIBLICA_URL = 'https://www.biblica.com/';
+  var LINK_VERSIONS = [
+    { id: 86, code: 'KLB', name: '현대인의 성경' },
+    { id: 142, code: 'RNKSV', name: '새번역' }
+  ];
+
+  var plan = null, byDate = {}, order = [], current = null;
+  var mem = { read: {}, size: 0, textOpen: true, chap: {}, shares: {}, questions: {} };
+
+  // 받은 본문은 이 창이 열려 있는 동안 메모리에만, 최대 두 장까지 둔다. 기기에는 저장하지 않는다.
+  var cache = {}, cacheOrder = [];
+  var view = { token: 0 };
+
+  function load() {
+    try {
+      var raw = window.localStorage.getItem(KEY);
+      if (raw) { var o = JSON.parse(raw); for (var k in o) { mem[k] = o[k]; } }
+    } catch (e) { /* storage may be unavailable: keep in-memory state */ }
+    if (!mem.chap) { mem.chap = {}; }
+  }
+  function save() {
+    try { window.localStorage.setItem(KEY, JSON.stringify(mem)); } catch (e) { /* ignore */ }
+  }
+
+  function el(tag, cls, txt) {
+    var n = document.createElement(tag);
+    if (cls) { n.className = cls; }
+    if (txt !== undefined && txt !== null) { n.textContent = txt; }
+    return n;
+  }
+  function link(text, href) {
+    var a = el('a', null, text); a.href = href; a.target = '_blank'; a.rel = 'noopener'; return a;
+  }
+  function parse(iso) { var p = iso.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function iso(d) {
+    return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+  }
+  function longDate(isoStr) {
+    var d = parse(isoStr);
+    return (d.getMonth() + 1) + '월 ' + d.getDate() + '일 ' + WD[d.getDay()] + '요일';
+  }
+  function hashFor(isoStr) { return 'd-' + isoStr.slice(5, 7) + isoStr.slice(8, 10); }
+  function fromHash() {
+    var m = /^#d-(\d\d)(\d\d)$/.exec(window.location.hash || '');
+    if (!m) { return null; }
+    var s = '2027-' + m[1] + '-' + m[2];
+    return byDate[s] ? s : null;
+  }
+  function unit(c) { return c.book === 'PSA' ? '편' : '장'; }
+  function chapterName(c) { return c.name + ' ' + c.ch + unit(c); }
+
+  function applySize() { document.documentElement.style.setProperty('--read', SIZES[mem.size] || SIZES[0]); }
+
+  /* ---------- fetching ---------- */
+  function refOf(c) { return c.book + '.' + c.ch; }
+  function remember(ref, entry) {
+    cache[ref] = entry;
+    cacheOrder = cacheOrder.filter(function (r) { return r !== ref; });
+    cacheOrder.push(ref);
+    while (cacheOrder.length > 2) { delete cache[cacheOrder.shift()]; }
+  }
+  function fetchChapter(c) {
+    var ref = refOf(c);
+    if (cache[ref]) { return Promise.resolve(cache[ref]); }
+    return fetch(FN_URL + '?ref=' + encodeURIComponent(ref), { headers: { apikey: FN_KEY }, cache: 'no-store' })
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('http ' + r.status); e.status = r.status; throw e; }
+        return r.json();
+      })
+      .then(function (data) { var entry = { data: data, texts: null }; remember(ref, entry); return entry; });
+  }
+
+  /* ---------- passage markup ----------
+     The HTML from the API is rebuilt element by element: only paragraph, heading,
+     poetry, verse-number and footnote structures are kept, every text node is kept
+     as it is, and nothing else (scripts, styles, links, attributes) is carried over. */
+  var seq = 0;
+  function hasClass(n, list) {
+    for (var i = 0; i < list.length; i++) { if (n.classList.contains(list[i])) { return list[i]; } }
+    return null;
+  }
+  var HEAD = ['s', 's1', 's2', 's3', 's4', 'ms', 'ms1', 'ms2', 'ms3', 'yv-h'];
+  var REFS = ['r', 'mr', 'sr'];
+  var POETRY = ['q', 'q1', 'q2', 'q3', 'q4', 'qc', 'qr', 'qm', 'qm1', 'qm2'];
+  var INDENT = ['pi', 'pi1', 'pi2', 'pmo', 'pm', 'li', 'li1', 'li2'];
+
+  function render_passage(html, key) {
+    var doc = new DOMParser().parseFromString('<div id="r">' + html + '</div>', 'text/html');
+    var root = doc.getElementById('r');
+    var out = el('div', 'pb read');
+    var st = { v: null, fn: 0, texts: {}, id: ++seq };
+
+    function inKey(v) { var n = parseInt(v, 10); return key && n >= key.v1 && n <= key.v2; }
+
+    function inline(src, dest, notes) {
+      Array.prototype.forEach.call(src.childNodes, function (n) {
+        if (n.nodeType === 3) {
+          var t = n.nodeValue;
+          if (!t) { return; }
+          if (st.v) {
+            var s = el('span', inKey(st.v) ? 'kv' : null, t);
+            s.setAttribute('data-v', st.v);
+            dest.appendChild(s);
+            st.texts[st.v] = (st.texts[st.v] || '') + t;
+          } else { dest.appendChild(document.createTextNode(t)); }
+          return;
+        }
+        if (n.nodeType !== 1) { return; }
+        var tag = n.tagName;
+        if (tag === 'SCRIPT' || tag === 'STYLE') { return; }
+        if (n.classList.contains('yv-v')) {
+          var v = parseInt(n.getAttribute('v') || '', 10);
+          if (v) { st.v = String(v); }
+          inline(n, dest, notes);
+          return;
+        }
+        if (n.classList.contains('yv-vlbl')) { dest.appendChild(el('span', 'vn', n.textContent.trim())); return; }
+        if (n.classList.contains('yv-n')) {
+          st.fn += 1;
+          var fr = n.querySelector('.fr'), ft = n.querySelector('.ft');
+          var id = 'fn-' + st.id + '-' + st.fn;
+          var b = el('button', 'fn', String(st.fn)); b.type = 'button';
+          b.setAttribute('aria-expanded', 'false'); b.setAttribute('aria-controls', id);
+          b.setAttribute('aria-label', '각주 ' + st.fn + ' 보기');
+          dest.appendChild(b);
+          notes.push({ id: id, btn: b, fr: fr ? fr.textContent.trim() : '', ft: (ft || n).textContent.trim() });
+          return;
+        }
+        if (tag === 'BR') { dest.appendChild(el('br')); return; }
+        inline(n, dest, notes);
+      });
+    }
+
+    function place(node, notes) {
+      out.appendChild(node);
+      notes.forEach(function (x) {
+        var box = el('div', 'note'); box.id = x.id; box.hidden = true; box.setAttribute('role', 'note');
+        if (x.fr) { box.appendChild(el('b', null, x.fr)); }
+        box.appendChild(document.createTextNode(x.ft));
+        out.appendChild(box);
+        x.btn.addEventListener('click', function () {
+          var open = box.hidden;
+          box.hidden = !open;
+          x.btn.setAttribute('aria-expanded', String(open));
+        });
+      });
+    }
+
+    function block(n) {
+      if (n.nodeType === 3) {
+        if (!n.nodeValue.trim()) { return; }
+        var tp = el('p', 'para'); var tn = []; inline({ childNodes: [n] }, tp, tn); place(tp, tn); return;
+      }
+      if (n.nodeType !== 1 || n.tagName === 'SCRIPT' || n.tagName === 'STYLE') { return; }
+      var known = hasClass(n, HEAD) || hasClass(n, REFS) || hasClass(n, POETRY) || hasClass(n, INDENT) ||
+        hasClass(n, ['p', 'm', 'nb', 'd', 'b', 'pc', 'pr', 'cls']);
+      var childBlocks = Array.prototype.some.call(n.children, function (c) { return c.tagName === 'DIV' || c.tagName === 'P'; });
+      if (!known && childBlocks) { Array.prototype.forEach.call(n.childNodes, block); return; }
+      var notes = [], node;
+      if (hasClass(n, HEAD)) { node = el('h4', 'sh'); }
+      else if (hasClass(n, REFS)) { node = el('p', 'r'); }
+      else if (n.classList.contains('d')) { node = el('p', 'd'); }
+      else if (n.classList.contains('b')) { out.appendChild(el('div', 'b')); return; }
+      else if (hasClass(n, POETRY)) {
+        var lvl = hasClass(n, ['q2', 'qm2']) ? ' q2' : hasClass(n, ['q3', 'q4']) ? ' q3' : '';
+        node = el('p', 'q' + lvl);
+      }
+      else if (hasClass(n, INDENT)) { node = el('p', 'para pi'); }
+      else { node = el('p', 'para'); }
+      if (st.v && st.texts[st.v]) { st.texts[st.v] += ' '; }
+      inline(n, node, notes);
+      if (!node.textContent.trim() && !notes.length) { return; }
+      place(node, notes);
+    }
+
+    Array.prototype.forEach.call(root.childNodes, block);
+    return { node: out, texts: st.texts };
+  }
+
+  function verseText(texts, key) {
+    var parts = [];
+    for (var v = key.v1; v <= key.v2; v++) {
+      if (!texts[String(v)]) { return null; }
+      parts.push(texts[String(v)].replace(/\s+/g, ' ').trim());
+    }
+    return parts.join(' ');
+  }
+
+  /* ---------- week strip ---------- */
+  function renderWeek() {
+    var nav = document.getElementById('week');
+    nav.textContent = '';
+    var d = parse(current);
+    var monday = new Date(d); monday.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    for (var i = 0; i < 7; i++) {
+      var x = new Date(monday); x.setDate(monday.getDate() + i);
+      var s = iso(x), day = byDate[s];
+      var b = el('button', 'day'); b.type = 'button';
+      b.appendChild(el('span', 'w', WD[x.getDay()]));
+      b.appendChild(el('span', 'd', String(x.getDate())));
+      b.appendChild(el('span', 'dot'));
+      if (!day) { b.disabled = true; b.setAttribute('aria-label', (x.getMonth() + 1) + '월 ' + x.getDate() + '일, 시안에 없는 날'); }
+      else {
+        var lab = longDate(s) + ', ' + (day.type === 'sunday' ? '통독을 쉬는 날' : day.ref);
+        if (mem.read[s]) { b.classList.add('is-read'); lab += ', 읽음'; }
+        if (day.type === 'sunday') { b.classList.add('is-rest'); }
+        if (s === current) { b.classList.add('is-current'); b.setAttribute('aria-current', 'date'); }
+        b.setAttribute('aria-label', lab);
+        b.addEventListener('click', go.bind(null, s));
+      }
+      nav.appendChild(b);
+    }
+  }
+
+  /* ---------- scripture ---------- */
+  function chapterIndex(day) {
+    var i = mem.chap[day.date] || 0;
+    return i < day.chapters.length ? i : 0;
+  }
+  function versionLinks(c) {
+    var box = el('div', 'links');
+    LINK_VERSIONS.forEach(function (v) {
+      box.appendChild(link('YouVersion에서 ' + v.name + '으로 보기',
+        'https://www.bible.com/bible/' + v.id + '/' + c.book + '.' + c.ch + '.' + v.code));
+    });
+    return box;
+  }
+  function showPassage(day, focusTitle) {
+    var host = document.getElementById('passage');
+    var tabs = document.getElementById('tabs');
+    if (!host) { return; }
+    var idx = chapterIndex(day), c = day.chapters[idx];
+    if (tabs) {
+      Array.prototype.forEach.call(tabs.children, function (b, i) { b.setAttribute('aria-pressed', String(i === idx)); });
+    }
+    var token = ++view.token;
+    host.textContent = '';
+    host.setAttribute('aria-busy', 'true');
+    host.appendChild(el('p', 'state', chapterName(c) + '을 불러오는 중입니다.'));
+
+    fetchChapter(c).then(function (entry) {
+      if (token !== view.token) { return; }
+      var key = day.key && day.key.book === c.book && day.key.ch === c.ch ? day.key : null;
+      var built = render_passage(entry.data.html || '', key);
+      if (!entry.texts) { entry.texts = built.texts; }
+      host.textContent = '';
+      var h = el('h3', null, chapterName(c)); h.tabIndex = -1;
+      host.appendChild(h);
+      host.appendChild(built.node);
+      if (idx + 1 < day.chapters.length) {
+        var nb = el('button', 'next-ch', '다음 장 ' + chapterName(day.chapters[idx + 1]) + ' 읽기'); nb.type = 'button';
+        nb.addEventListener('click', function () { pick(day, idx + 1, true); });
+        host.appendChild(nb);
+      }
+      var at = el('div', 'attrib');
+      String(entry.data.copyright || '').split('\n').forEach(function (line) {
+        if (line.trim()) { at.appendChild(el('p', null, line.trim())); }
+      });
+      var bp = el('p'); bp.appendChild(link('Biblica 웹사이트 (www.biblica.com)', BIBLICA_URL)); at.appendChild(bp);
+      host.appendChild(at);
+      host.appendChild(versionLinks(c));
+      host.removeAttribute('aria-busy');
+      if (focusTitle) { h.focus({ preventScroll: true }); }
+      fillKey(day);
+    }).catch(function (err) {
+      if (token !== view.token) { return; }
+      host.textContent = '';
+      host.removeAttribute('aria-busy');
+      var msg = err && err.status === 429
+        ? '지금 본문 요청이 많아 잠시 쉬고 있습니다. 몇 분 뒤에 다시 시도해 주세요. 그동안은 종이 성경이나 아래 링크로 읽어 주세요.'
+        : '지금은 본문을 불러오지 못했습니다. 종이 성경이나 아래 링크로 읽어 주시고, 잠시 뒤 다시 시도해 주세요.';
+      var box = el('div', 'state'); box.setAttribute('role', 'status');
+      box.appendChild(el('p', null, msg));
+      var retry = el('button', 'btn', '다시 시도'); retry.type = 'button';
+      retry.addEventListener('click', function () { showPassage(day, false); });
+      box.appendChild(retry);
+      host.appendChild(box);
+      host.appendChild(versionLinks(c));
+    });
+  }
+  function pick(day, i, scroll) {
+    mem.chap[day.date] = i; save();
+    if (!mem.textOpen) { mem.textOpen = true; save(); syncTextToggle(); }
+    showPassage(day, scroll);
+    if (scroll) {
+      var sc = document.getElementById('scripture');
+      if (sc) { sc.scrollIntoView({ block: 'start', behavior: 'auto' }); }
+    }
+  }
+  var syncTextToggle = function () {};
+
+  /* ---------- key verse ---------- */
+  function fillKey(day) {
+    var box = document.getElementById('keyBody');
+    if (!box || !day.key) { return; }
+    var k = day.key;
+    var entry = cache[k.book + '.' + k.ch];
+    var t = entry && entry.texts ? verseText(entry.texts, k) : null;
+    box.textContent = '';
+    var bq = el('blockquote', 'read');
+    if (t) {
+      bq.appendChild(el('p', null, t));
+      bq.appendChild(el('cite', null, k.ref + ', 현대인의 성경'));
+      box.appendChild(bq);
+      return;
+    }
+    bq.appendChild(el('cite', null, k.ref));
+    box.appendChild(bq);
+    if (entry) { return; }
+    var i = -1;
+    day.chapters.forEach(function (c, j) { if (c.book === k.book && c.ch === k.ch) { i = j; } });
+    if (i < 0) { return; }
+    var go = el('button', 'btn go', '본문에서 이 구절 보기'); go.type = 'button';
+    go.addEventListener('click', function () {
+      mem.chap[day.date] = i; save();
+      if (!mem.textOpen) { mem.textOpen = true; save(); syncTextToggle(); }
+      showPassage(day, false);
+      var tries = 0;
+      (function seek() {
+        var hit = document.querySelector('#passage .kv');
+        if (hit) { hit.scrollIntoView({ block: 'center', behavior: 'auto' }); return; }
+        if (++tries < 40) { setTimeout(seek, 150); }
+      })();
+    });
+    box.appendChild(go);
+  }
+
+  /* ---------- reading day ---------- */
+  function section(cls, label) {
+    var s = el('section', cls);
+    if (label) { s.appendChild(el('h2', 'label', label)); }
+    return s;
+  }
+  function postList(kind, listEl) {
+    listEl.textContent = '';
+    var arr = (mem[kind][current] || []);
+    arr.forEach(function (t, i) {
+      var li = el('li');
+      li.appendChild(el('p', null, t));
+      var del = el('button', null, '지우기'); del.type = 'button';
+      del.addEventListener('click', function () {
+        mem[kind][current].splice(i, 1); save(); postList(kind, listEl);
+      });
+      li.appendChild(del);
+      listEl.appendChild(li);
+    });
+  }
+  function writeArea(kind, label, placeholder, action, hint) {
+    var s = section('write', label);
+    var form = el('form');
+    var id = kind + 'Input';
+    var lab = el('label', 'sr', label); lab.htmlFor = id;
+    var ta = el('textarea'); ta.id = id; ta.placeholder = placeholder; ta.maxLength = 600;
+    var row = el('div', 'row');
+    var btn = el('button', 'btn', action); btn.type = 'submit';
+    row.appendChild(btn);
+    form.appendChild(lab); form.appendChild(ta); form.appendChild(row);
+    var list = el('ul', 'posts');
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var v = ta.value.trim();
+      if (!v) { ta.focus(); return; }
+      (mem[kind][current] = mem[kind][current] || []).push(v);
+      save(); ta.value = ''; postList(kind, list);
+    });
+    s.appendChild(form); s.appendChild(list);
+    if (hint) { s.appendChild(el('p', 'hint', hint)); }
+    postList(kind, list);
+    return s;
+  }
+
+  function renderReading(day) {
+    var main = document.getElementById('main');
+    main.textContent = '';
+
+    var hero = el('section', 'hero');
+    hero.appendChild(el('p', 'section-name', day.section));
+    hero.appendChild(el('h1', null, day.ref));
+    var pr = el('div', 'progress');
+    var bar = el('div', 'bar'); var fill = el('i'); fill.style.width = (day.n / plan.meta.totalDays * 100).toFixed(2) + '%';
+    bar.appendChild(fill); pr.appendChild(bar);
+    pr.appendChild(el('span', null, plan.meta.totalDays + '일 가운데 ' + day.n + '일째'));
+    hero.appendChild(pr);
+    main.appendChild(hero);
+
+    var g = el('section', 'guide');
+    g.appendChild(el('h2', null, day.title));
+    var body = el('div', 'read');
+    day.story.forEach(function (p) { body.appendChild(el('p', null, p)); });
+    g.appendChild(body);
+    main.appendChild(g);
+
+    var sc = el('section', 'scripture'); sc.id = 'scripture';
+    var head = el('div', 'scripture-head');
+    head.appendChild(el('h2', 'label', '본문'));
+    head.appendChild(el('span', 'ver', '현대인의 성경'));
+    var tg = el('button', 'text-btn'); tg.type = 'button';
+    head.appendChild(tg);
+    sc.appendChild(head);
+    var wrap = el('div'); wrap.id = 'textBody';
+    if (day.chapters.length > 1) {
+      var same = day.chapters.every(function (c) { return c.book === day.chapters[0].book; });
+      var tabs = el('div', 'tabs'); tabs.id = 'tabs';
+      tabs.setAttribute('role', 'group'); tabs.setAttribute('aria-label', '장 고르기');
+      day.chapters.forEach(function (c, i) {
+        var b = el('button', 'tab', same ? c.ch + unit(c) : chapterName(c)); b.type = 'button';
+        b.setAttribute('aria-pressed', 'false');
+        b.addEventListener('click', function () { if (chapterIndex(day) !== i) { pick(day, i, false); } });
+        tabs.appendChild(b);
+      });
+      wrap.appendChild(tabs);
+    }
+    var host = el('div', 'passage'); host.id = 'passage'; host.setAttribute('aria-live', 'polite');
+    wrap.appendChild(host);
+    sc.appendChild(wrap);
+    syncTextToggle = function () {
+      wrap.hidden = !mem.textOpen;
+      tg.textContent = mem.textOpen ? '본문 접기' : '본문 펼치기';
+      tg.setAttribute('aria-expanded', String(!!mem.textOpen));
+    };
+    tg.setAttribute('aria-controls', 'textBody');
+    tg.addEventListener('click', function () {
+      mem.textOpen = !mem.textOpen; save(); syncTextToggle();
+      if (mem.textOpen && !host.firstChild) { showPassage(day, false); }
+    });
+    syncTextToggle();
+    main.appendChild(sc);
+
+    var k = section('key', '눈여겨볼 절');
+    var kb = el('div'); kb.id = 'keyBody'; k.appendChild(kb);
+    main.appendChild(k);
+    fillKey(day);
+
+    var q = section('ask', '나눔 질문');
+    var qb = el('div', 'read'); qb.appendChild(el('p', null, day.question)); q.appendChild(qb);
+    main.appendChild(q);
+
+    if (day.extra) {
+      var x = el('section', 'extra');
+      var xl = el('h2', 'label', '읽을거리'); xl.appendChild(el('span', 'pilot', '시범')); x.appendChild(xl);
+      x.appendChild(el('h3', null, day.extra.title));
+      var xb = el('div', 'read'); xb.appendChild(el('p', null, day.extra.body)); x.appendChild(xb);
+      var src = el('p', 'src', '출처 ');
+      day.extra.sources.forEach(function (s, i) {
+        if (i) { src.appendChild(document.createTextNode(', ')); }
+        src.appendChild(link(s.label, s.url));
+      });
+      x.appendChild(src);
+      main.appendChild(x);
+    }
+
+    main.appendChild(writeArea('shares', '한 줄 나눔', '오늘 읽으며 마음에 남은 것을 적어 주세요', '나눔 남기기',
+      '실제 앱에서는 함께 읽는 성도들의 나눔이 이 자리에 모입니다.'));
+    main.appendChild(writeArea('questions', '궁금한 것 묻기', '본문을 읽다가 궁금한 점을 적어 주세요', '질문 남기기',
+      '실제 앱에서는 질문이 목사님께 전해집니다.'));
+
+    if (mem.textOpen) { showPassage(day, false); }
+  }
+
+  /* ---------- Sunday ---------- */
+  function renderSunday() {
+    var main = document.getElementById('main');
+    main.textContent = '';
+    var hero = el('section', 'hero');
+    hero.appendChild(el('p', 'section-name', '주일'));
+    hero.appendChild(el('h1', null, '오늘은 통독을 쉽니다'));
+    main.appendChild(hero);
+
+    var g = el('section', 'guide');
+    var body = el('div', 'read');
+    body.appendChild(el('p', null, '예배에서 만나요. 밀린 날이 있어도 괜찮습니다. 내일은 내일의 본문으로 함께 읽습니다.'));
+    g.appendChild(body);
+    main.appendChild(g);
+
+    var wk = section('rest', '이번 주에 읽은 본문');
+    var ul = el('ul', 'rest-list');
+    var d = parse(current);
+    for (var i = 6; i >= 1; i--) {
+      var x = new Date(d); x.setDate(d.getDate() - i);
+      var s = iso(x), day = byDate[s];
+      if (!day || day.type === 'sunday') { continue; }
+      var li = el('li');
+      li.appendChild(el('span', 'w', WD[x.getDay()]));
+      li.appendChild(el('span', 'r', day.ref));
+      li.appendChild(el('span', 's' + (mem.read[s] ? ' done' : ''), mem.read[s] ? '읽음' : '아직'));
+      ul.appendChild(li);
+    }
+    wk.appendChild(ul);
+    main.appendChild(wk);
+
+    var nx = section('rest', '내일의 본문');
+    var t = new Date(d); t.setDate(d.getDate() + 1);
+    var nd = byDate[iso(t)];
+    var ref = nd ? nd.ref : plan.meta.nextAfter.ref;
+    var nb = el('div', 'read'); nb.appendChild(el('p', null, ref)); nx.appendChild(nb);
+    main.appendChild(nx);
+  }
+
+  /* ---------- shell ---------- */
+  function syncRead() {
+    var btn = document.getElementById('readBtn');
+    btn.setAttribute('aria-pressed', String(!!mem.read[current]));
+  }
+  function render() {
+    var day = byDate[current];
+    view.token += 1;
+    document.getElementById('dateLabel').textContent = longDate(current);
+    var i = order.indexOf(current);
+    document.getElementById('prev').disabled = i <= 0;
+    document.getElementById('next').disabled = i >= order.length - 1;
+    renderWeek();
+    var dock = document.getElementById('dock');
+    if (day.type === 'sunday') { dock.hidden = true; renderSunday(); }
+    else { dock.hidden = false; renderReading(day); syncRead(); }
+  }
+  function go(s, keepScroll) {
+    if (!byDate[s]) { return; }
+    current = s;
+    try { window.history.replaceState(null, '', '#' + hashFor(s)); } catch (e) { window.location.hash = hashFor(s); }
+    render();
+    if (!keepScroll) { window.scrollTo(0, 0); }
+  }
+  function step(n) {
+    var i = order.indexOf(current) + n;
+    if (i >= 0 && i < order.length) { go(order[i]); }
+  }
+
+  function start() {
+    plan.days.forEach(function (d) { byDate[d.date] = d; order.push(d.date); });
+    var today = iso(new Date());
+    var first = fromHash() || (byDate[today] ? today : order[0]);
+    document.getElementById('prev').addEventListener('click', step.bind(null, -1));
+    document.getElementById('next').addEventListener('click', step.bind(null, 1));
+    document.getElementById('size').addEventListener('click', function () {
+      mem.size = (mem.size + 1) % SIZES.length; save(); applySize();
+    });
+    document.getElementById('readBtn').addEventListener('click', function () {
+      if (mem.read[current]) { delete mem.read[current]; } else { mem.read[current] = true; }
+      save(); syncRead(); renderWeek();
+    });
+    window.addEventListener('hashchange', function () {
+      var s = fromHash(); if (s && s !== current) { go(s); }
+    });
+    go(first, true);
+  }
+
+  load(); applySize();
+  fetch('data/january.json')
+    .then(function (r) { if (!r.ok) { throw new Error('plan'); } return r.json(); })
+    .then(function (p) { plan = p; start(); })
+    .catch(function () {
+      var main = document.getElementById('main');
+      main.textContent = '';
+      main.appendChild(el('p', 'status', '자료를 불러오지 못했습니다. 화면을 새로 고쳐 주세요.'));
+    });
+})();
+</script>
+</body>
+</html>
