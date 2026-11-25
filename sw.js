@@ -3,7 +3,7 @@
 // 성경 본문(Supabase 함수)과 로그인, 나눔 요청은 다른 출처라 손대지 않고 그대로 통과시킨다.
 // 그래서 현대인의 성경 본문은 기기에 저장되지 않는다.
 
-const CACHE = 'tongdok-shell-v1';
+const CACHE = 'tongdok-shell-v2';
 const SHELL = [
   './',
   'manifest.webmanifest',
