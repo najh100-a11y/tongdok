@@ -90,13 +90,19 @@ main>section+section{border-top:1px solid var(--rule)}
 .progress .bar i{display:block;height:100%;min-width:3px;background:var(--leaf)}
 .progress span{font-size:.8125rem;color:var(--ink-soft);font-variant-numeric:tabular-nums;white-space:nowrap}
 
+.refs{margin:16px 0 0;font-size:.8125rem;line-height:1.7;color:var(--ink-soft);word-break:keep-all}
+.refs i{font-style:normal}
 .guide h2{margin:0 0 14px;font-family:var(--font-read);font-synthesis:none;font-weight:400;font-size:1.4375rem;line-height:1.4;letter-spacing:-0.015em;word-break:keep-all;text-wrap:balance}
 
 /* scripture */
 .scripture-head{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
 .scripture-head .label{margin:0}
 .scripture-head .ver{font-size:.8125rem;color:var(--ink-soft)}
-.text-btn{margin-left:auto;border:0;background:none;padding:8px 0 8px 12px;font-size:.875rem;font-weight:500;color:var(--leaf)}
+.invite{margin:12px 0 0;padding:16px 18px;border:1px solid var(--rule);border-radius:16px;background:var(--surface)}
+.invite .lead{margin:0;font-family:var(--font-read);font-synthesis:none;font-size:var(--read);line-height:1.75;letter-spacing:-0.01em;word-break:keep-all}
+.invite .sub{margin:6px 0 0;font-size:.8125rem;line-height:1.6;color:var(--ink-soft);word-break:keep-all}
+.text-btn{margin-top:12px;min-height:40px;padding:0 16px;border:1px solid var(--leaf);border-radius:12px;background:none;font-size:.875rem;font-weight:600;color:var(--leaf)}
+.text-btn[aria-expanded="true"]{border-color:var(--rule);color:var(--ink-soft)}
 .tabs{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0}
 .tab{min-height:36px;padding:0 15px;border:1px solid var(--rule);border-radius:999px;background:none;font-size:.875rem;font-weight:500;color:var(--ink-soft);font-variant-numeric:tabular-nums}
 .tab[aria-pressed="true"]{border-color:var(--leaf);background:var(--leaf-wash);color:var(--leaf)}
@@ -219,7 +225,7 @@ main>section+section{border-top:1px solid var(--rule)}
   ];
 
   var plan = null, byDate = {}, order = [], current = null;
-  var mem = { read: {}, size: 0, textOpen: true, chap: {}, shares: {}, questions: {} };
+  var mem = { read: {}, size: 0, textOpen: false, chap: {}, shares: {}, questions: {} };
 
   // 받은 본문은 이 창이 열려 있는 동안 메모리에만, 최대 두 장까지 둔다. 기기에는 저장하지 않는다.
   var cache = {}, cacheOrder = [];
@@ -602,15 +608,27 @@ main>section+section{border-top:1px solid var(--rule)}
     var body = el('div', 'read');
     day.story.forEach(function (p) { body.appendChild(el('p', null, p)); });
     g.appendChild(body);
+    if (day.refs && day.refs.length) {
+      var rf = el('p', 'refs', '참고한 책 ');
+      day.refs.forEach(function (r, i) {
+        if (i) { rf.appendChild(document.createTextNode(', ')); }
+        rf.appendChild(document.createTextNode(r.author + ' '));
+        rf.appendChild(el('i', null, '『' + r.title + '』'));
+      });
+      g.appendChild(rf);
+    }
     main.appendChild(g);
 
     var sc = el('section', 'scripture'); sc.id = 'scripture';
     var head = el('div', 'scripture-head');
     head.appendChild(el('h2', 'label', '본문'));
-    head.appendChild(el('span', 'ver', '현대인의 성경'));
-    var tg = el('button', 'text-btn'); tg.type = 'button';
-    head.appendChild(tg);
     sc.appendChild(head);
+    var inv = el('div', 'invite');
+    inv.appendChild(el('p', 'lead', '성경책을 펴고 ' + day.ref + '을 읽어 주세요.'));
+    inv.appendChild(el('p', 'sub', '가능하면 성경책을 직접 펴서 읽기를 권합니다. 성경이 곁에 없을 때는 앱에서 현대인의 성경으로 읽을 수 있습니다.'));
+    var tg = el('button', 'text-btn'); tg.type = 'button';
+    inv.appendChild(tg);
+    sc.appendChild(inv);
     var wrap = el('div'); wrap.id = 'textBody';
     if (day.chapters.length > 1) {
       var same = day.chapters.every(function (c) { return c.book === day.chapters[0].book; });
@@ -629,7 +647,7 @@ main>section+section{border-top:1px solid var(--rule)}
     sc.appendChild(wrap);
     syncTextToggle = function () {
       wrap.hidden = !mem.textOpen;
-      tg.textContent = mem.textOpen ? '본문 접기' : '본문 펼치기';
+      tg.textContent = mem.textOpen ? '앱 본문 접기' : '앱에서 읽기';
       tg.setAttribute('aria-expanded', String(!!mem.textOpen));
     };
     tg.setAttribute('aria-controls', 'textBody');
