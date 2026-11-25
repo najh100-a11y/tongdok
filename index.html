@@ -155,6 +155,48 @@ main>section+section{border-top:1px solid var(--rule)}
 .posts button{border:0;background:none;padding:2px 0;font-size:.8125rem;color:var(--ink-soft);text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
 .hint{margin:10px 0 0;font-size:.8125rem;color:var(--ink-soft);word-break:keep-all}
 
+/* shared posts */
+.posts li.post{display:block;padding:14px 16px;border-radius:14px;background:var(--surface);border:1px solid var(--rule)}
+.posts li.empty{display:block;padding:4px 0;background:none;font-size:.875rem;color:var(--ink-soft)}
+.post .meta{display:flex;align-items:baseline;gap:8px;margin-bottom:4px;font-size:.8125rem;color:var(--ink-soft)}
+.post .meta b{font-weight:600;color:var(--ink)}
+.post .body{margin:0;font-family:var(--font-read);font-synthesis:none;font-size:var(--read);line-height:1.75;letter-spacing:-0.01em;white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere}
+.post .acts{display:flex;gap:16px;margin-top:8px}
+.post .acts button,.reply button.del{min-height:32px;border:0;background:none;padding:0;font-size:.8125rem;color:var(--ink-soft);text-decoration:underline;text-underline-offset:3px}
+.post .acts button.warn,.reply button.warn{color:#A1422F}
+.replies{margin:10px 0 0;padding:10px 0 0 12px;border-left:2px solid var(--leaf-wash)}
+.replies ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.reply .meta{margin-bottom:2px}
+.reply p{margin:0;font-size:.9375rem;line-height:1.65;white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere}
+.replies form{margin-top:10px}
+.replies textarea{min-height:64px}
+.together{margin:10px 0 0;font-size:.8125rem;color:var(--leaf);font-weight:500}
+
+/* sign-in, join, account */
+.gate{padding:16px 18px;border:1px solid var(--rule);border-radius:16px;background:var(--surface)}
+.gate .lead{margin:0 0 12px;font-size:.9375rem;line-height:1.65;word-break:keep-all}
+.kakao-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:50px;border:0;border-radius:12px;background:#FEE500;color:rgba(0,0,0,.85);font-size:1rem;font-weight:600}
+.kakao-btn svg{width:18px;height:18px}
+.field{display:grid;gap:6px;margin:0 0 14px}
+.field label{font-size:.8125rem;font-weight:600;color:var(--ink-soft)}
+.field input{width:100%;height:46px;padding:0 14px;border:1px solid var(--rule);border-radius:12px;background:var(--paper);font:inherit;font-size:1rem;color:var(--ink)}
+.check{display:flex;gap:10px;align-items:flex-start;margin:4px 0 14px;font-size:.875rem;line-height:1.6;word-break:keep-all}
+.check input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--leaf);flex:none}
+.privacy{margin:0 0 14px;padding:12px 14px;border-radius:12px;background:var(--leaf-wash);font-size:.8125rem;line-height:1.7;word-break:keep-all}
+.privacy p{margin:0 0 4px}
+.privacy p:last-child{margin:0}
+.solid{width:100%;min-height:48px;border:1px solid var(--leaf);border-radius:12px;background:var(--leaf);color:var(--on-leaf);font-size:1rem;font-weight:600}
+.msg{margin:10px 0 0;font-size:.875rem;line-height:1.6;color:#A1422F;word-break:keep-all}
+.msg.ok{color:var(--leaf)}
+.acct-actions{display:flex;flex-wrap:wrap;gap:10px}
+.member-list{list-style:none;margin:0;padding:0}
+.member-list li{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--rule)}
+.member-list li:last-child{border-bottom:0}
+.member-list .n{flex:1;font-size:.9375rem}
+.member-list .s{font-size:.75rem;color:var(--ink-soft)}
+.member-list button{min-height:36px;padding:0 12px;border:1px solid var(--rule);border-radius:10px;background:none;font-size:.8125rem}
+.back{display:inline-flex;align-items:center;gap:6px;min-height:40px;margin-top:18px;padding:0;border:0;background:none;font-size:.875rem;color:var(--ink-soft)}
+
 /* Sunday */
 .rest-list{list-style:none;margin:0;padding:0}
 .rest-list li{display:flex;align-items:baseline;gap:12px;padding:11px 0;border-bottom:1px solid var(--rule)}
@@ -191,11 +233,15 @@ main>section+section{border-top:1px solid var(--rule)}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
     </button>
     <button class="icon-btn size-btn" id="size" type="button" aria-label="글자 크기 바꾸기"><span class="a">가</span><span class="b">가</span></button>
+    <button class="icon-btn" id="acctBtn" type="button" aria-label="내 정보">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c1.2-3.3 3.8-5 7-5s5.8 1.7 7 5"/></svg>
+    </button>
   </header>
   <nav class="week" id="week" aria-label="이번 주 본문"></nav>
   <main id="main"><p class="status">불러오는 중입니다.</p></main>
   <footer class="credits">
-    <p>시안입니다. 읽음 표시와 나눔, 질문은 아직 이 기기에만 저장되고 다른 사람에게 보이지 않습니다. 2027년 1월 날짜만 넘겨 볼 수 있습니다. 가이드와 읽을거리는 목회자 검토 전의 초안입니다.</p>
+    <p>시안입니다. 2027년 1월 날짜만 넘겨 볼 수 있습니다. 가이드와 읽을거리는 목회자 검토 전의 초안입니다.</p>
+    <p>나눔과 질문, 읽음 기록은 카카오로 로그인하고 교인 등록을 한 사람끼리만 보입니다.</p>
     <p>앱 안의 본문은 현대인의 성경입니다. Biblica의 허락을 받아 YouVersion Platform을 통해 싣고, 장마다 저작권 표시를 함께 보여 줍니다.</p>
     <p>이 화면에는 리디주식회사에서 제공한 리디바탕 글꼴과 Pretendard 글꼴이 사용되어 있습니다.</p>
   </footer>
@@ -207,6 +253,7 @@ main>section+section{border-top:1px solid var(--rule)}
   </div>
 </div>
 
+<script src="vendor/supabase-2.119.2.js"></script>
 <script>
 (function () {
   'use strict';
@@ -224,7 +271,69 @@ main>section+section{border-top:1px solid var(--rule)}
   ];
 
   var plan = null, byDate = {}, order = [], current = null;
-  var mem = { read: {}, size: 0, textOpen: false, chap: {}, shares: {}, questions: {} };
+  var mem = { read: {}, size: 0, textOpen: false, chap: {} };
+
+  /* ---------- sign-in (Kakao through Supabase Auth) ----------
+     Logging in only proves who someone is. Seeing the text in the app, the shared posts
+     and the read counts also needs a member row, made once with the church code and a name. */
+  var SB_URL = 'https://khxwbstnhiimwcdchtjy.supabase.co';
+  var RETURN_KEY = 'jinsup-tongdok-return';
+  var sb = null;
+  var acct = { session: null, me: null, loginError: null };
+  try {
+    sb = window.supabase.createClient(SB_URL, FN_KEY, {
+      auth: { flowType: 'pkce', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'jinsup-tongdok-auth' }
+    });
+  } catch (e) { sb = null; }
+
+  function signedIn() { return !!acct.session; }
+  function isMember() { return !!(acct.me && acct.me.member); }
+  function isAdmin() { return isMember() && acct.me.role === 'admin'; }
+  function myId() { return acct.session && acct.session.user ? acct.session.user.id : null; }
+
+  function loadMe() {
+    if (!sb || !acct.session) { acct.me = null; return Promise.resolve(); }
+    return sb.rpc('me').then(function (r) { acct.me = r.error ? null : r.data; })
+      .catch(function () { acct.me = null; });
+  }
+  function initAuth() {
+    if (!sb) { return Promise.resolve(); }
+    var q = window.location.search || '';
+    if (/[?&]error=/.test(q)) { acct.loginError = '카카오 로그인을 마치지 못했습니다. 다시 시도해 주세요.'; }
+    return sb.auth.getSession().then(function (r) {
+      acct.session = r.data ? r.data.session : null;
+    }).catch(function () { acct.session = null; })
+      .then(function () {
+        if (/[?&](code|error)=/.test(q)) {
+          try { window.history.replaceState(null, '', window.location.pathname + window.location.hash); } catch (e) { /* ignore */ }
+        }
+        return loadMe();
+      })
+      .then(function () {
+        sb.auth.onAuthStateChange(function (ev, session) {
+          if (ev === 'TOKEN_REFRESHED' || ev === 'USER_UPDATED') { acct.session = session; return; }
+          if (ev === 'SIGNED_OUT') { acct.session = null; acct.me = null; if (plan) { render(); } }
+        });
+      });
+  }
+  function signIn() {
+    if (!sb) { return; }
+    try { window.sessionStorage.setItem(RETURN_KEY, current || ''); } catch (e) { /* ignore */ }
+    sb.auth.signInWithOAuth({ provider: 'kakao', options: { redirectTo: window.location.origin + window.location.pathname } });
+  }
+  function returnDay() {
+    try {
+      var s = window.sessionStorage.getItem(RETURN_KEY);
+      window.sessionStorage.removeItem(RETURN_KEY);
+      return s && byDate[s] ? s : null;
+    } catch (e) { return null; }
+  }
+  function accessToken() {
+    if (!sb) { return Promise.resolve(null); }
+    return sb.auth.getSession().then(function (r) {
+      var s = r.data && r.data.session; acct.session = s || null; return s ? s.access_token : null;
+    }).catch(function () { return null; });
+  }
 
   // 받은 본문은 이 창이 열려 있는 동안 메모리에만, 최대 두 장까지 둔다. 기기에는 저장하지 않는다.
   var cache = {}, cacheOrder = [];
@@ -236,6 +345,7 @@ main>section+section{border-top:1px solid var(--rule)}
       if (raw) { var o = JSON.parse(raw); for (var k in o) { mem[k] = o[k]; } }
     } catch (e) { /* storage may be unavailable: keep in-memory state */ }
     if (!mem.chap) { mem.chap = {}; }
+    delete mem.shares; delete mem.questions;  // 예전 시안에서 기기에만 두던 글
   }
   function save() {
     try { window.localStorage.setItem(KEY, JSON.stringify(mem)); } catch (e) { /* ignore */ }
@@ -281,7 +391,11 @@ main>section+section{border-top:1px solid var(--rule)}
   function fetchChapter(c) {
     var ref = refOf(c);
     if (cache[ref]) { return Promise.resolve(cache[ref]); }
-    return fetch(FN_URL + '?ref=' + encodeURIComponent(ref), { headers: { apikey: FN_KEY }, cache: 'no-store' })
+    return accessToken().then(function (tok) {
+      var h = { apikey: FN_KEY };
+      if (tok) { h.Authorization = 'Bearer ' + tok; }
+      return fetch(FN_URL + '?ref=' + encodeURIComponent(ref), { headers: h, cache: 'no-store' });
+    })
       .then(function (r) {
         if (!r.ok) { var e = new Error('http ' + r.status); e.status = r.status; throw e; }
         return r.json();
@@ -487,7 +601,9 @@ main>section+section{border-top:1px solid var(--rule)}
       host.removeAttribute('aria-busy');
       var msg = err && err.status === 429
         ? '지금 본문 요청이 많아 잠시 쉬고 있습니다. 몇 분 뒤에 다시 시도해 주세요. 그동안은 종이 성경이나 아래 링크로 읽어 주세요.'
-        : '지금은 본문을 불러오지 못했습니다. 종이 성경이나 아래 링크로 읽어 주시고, 잠시 뒤 다시 시도해 주세요.';
+        : err && err.status === 401
+          ? '로그인이 끝났거나 교인 등록이 확인되지 않았습니다. 화면을 새로 고친 뒤 다시 시도해 주세요.'
+          : '지금은 본문을 불러오지 못했습니다. 종이 성경이나 아래 링크로 읽어 주시고, 잠시 뒤 다시 시도해 주세요.';
       var box = el('div', 'state'); box.setAttribute('role', 'status');
       box.appendChild(el('p', null, msg));
       var retry = el('button', 'btn', '다시 시도'); retry.type = 'button';
@@ -525,7 +641,7 @@ main>section+section{border-top:1px solid var(--rule)}
     }
     bq.appendChild(el('cite', null, k.ref));
     box.appendChild(bq);
-    if (entry) { return; }
+    if (entry || !isMember()) { return; }
     var i = -1;
     day.chapters.forEach(function (c, j) { if (c.book === k.book && c.ch === k.ch) { i = j; } });
     if (i < 0) { return; }
@@ -550,42 +666,357 @@ main>section+section{border-top:1px solid var(--rule)}
     if (label) { s.appendChild(el('h2', 'label', label)); }
     return s;
   }
-  function postList(kind, listEl) {
-    listEl.textContent = '';
-    var arr = (mem[kind][current] || []);
-    arr.forEach(function (t, i) {
-      var li = el('li');
-      li.appendChild(el('p', null, t));
-      var del = el('button', null, '지우기'); del.type = 'button';
-      del.addEventListener('click', function () {
-        mem[kind][current].splice(i, 1); save(); postList(kind, listEl);
-      });
-      li.appendChild(del);
-      listEl.appendChild(li);
+  /* ---------- sign-in and join cards ---------- */
+  var KAKAO_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3.5c-5.1 0-9.2 3.2-9.2 7.2 0 2.6 1.7 4.8 4.3 6.1l-.9 3.4c-.1.3.3.6.6.4l4-2.6c.4 0 .8.1 1.2.1 5.1 0 9.2-3.2 9.2-7.3S17.1 3.5 12 3.5z"/></svg>';
+  function kakaoButton() {
+    var b = el('button', 'kakao-btn'); b.type = 'button';
+    b.innerHTML = KAKAO_ICON; b.appendChild(el('span', null, '카카오로 로그인'));
+    b.addEventListener('click', signIn);
+    return b;
+  }
+  var JOIN_ERRORS = {
+    bad_code: '교회 코드가 맞지 않습니다. 교회 단톡방이나 목사님께 코드를 확인해 주세요.',
+    bad_name: '이름은 1자에서 20자 사이로 적어 주세요.',
+    blocked: '이 계정은 이용이 멈춰 있습니다. 목사님께 문의해 주세요.',
+    too_many_attempts: '코드를 여러 번 틀려 한 시간 동안 등록할 수 없습니다. 잠시 뒤 다시 시도해 주세요.',
+    not_signed_in: '로그인이 끝났습니다. 다시 로그인해 주세요.'
+  };
+  function privacyBox() {
+    var p = el('div', 'privacy');
+    p.appendChild(el('p', null, '모으는 정보: 카카오 회원번호와 닉네임, 프로필 사진 주소(로그인에 쓰임), 교회에서 부르는 이름, 남긴 나눔·질문·답글, 읽음 표시'));
+    p.appendChild(el('p', null, '쓰는 곳: 진실한숲교회 통독 나눔. 이름과 글은 등록한 교인끼리만 보이고, 읽음 표시는 날마다 몇 명이 읽었는지 숫자로만 보입니다.'));
+    p.appendChild(el('p', null, '보관: 교회가 쓰는 Supabase 서울 지역 서버에 두고, 내 정보에서 탈퇴하면 바로 모두 지워집니다.'));
+    return p;
+  }
+  function joinForm(onDone) {
+    var f = el('form');
+    var f1 = el('div', 'field'), l1 = el('label', null, '교회 코드'), i1 = el('input');
+    i1.id = 'joinCode'; l1.htmlFor = 'joinCode'; i1.autocomplete = 'off'; i1.inputMode = 'text'; i1.maxLength = 30; i1.required = true;
+    f1.appendChild(l1); f1.appendChild(i1);
+    var f2 = el('div', 'field'), l2 = el('label', null, '이름 (나눔에 보일 이름)'), i2 = el('input');
+    i2.id = 'joinName'; l2.htmlFor = 'joinName'; i2.autocomplete = 'name'; i2.maxLength = 20; i2.required = true;
+    var km = acct.session && acct.session.user && acct.session.user.user_metadata;
+    if (km && (km.full_name || km.name)) { i2.value = String(km.full_name || km.name).slice(0, 20); }
+    f2.appendChild(l2); f2.appendChild(i2);
+    var ck = el('label', 'check'), cb = el('input'); cb.type = 'checkbox'; cb.required = true;
+    ck.appendChild(cb); ck.appendChild(el('span', null, '아래 개인정보 안내를 읽었고 동의합니다.'));
+    var btn = el('button', 'solid', '교인으로 등록하기'); btn.type = 'submit';
+    var msg = el('p', 'msg'); msg.setAttribute('role', 'status');
+    f.appendChild(f1); f.appendChild(f2); f.appendChild(privacyBox()); f.appendChild(ck); f.appendChild(btn); f.appendChild(msg);
+    f.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      msg.textContent = '';
+      if (!cb.checked) { msg.textContent = '개인정보 안내에 동의해 주세요.'; return; }
+      btn.disabled = true;
+      sb.rpc('join_church', { p_code: i1.value, p_name: i2.value }).then(function (r) {
+        btn.disabled = false;
+        var d = r.data || {};
+        if (r.error || !d.ok) { msg.textContent = JOIN_ERRORS[d.error] || '등록하지 못했습니다. 잠시 뒤 다시 시도해 주세요.'; return; }
+        return loadMe().then(function () { syncReadsFromServer().then(function () { onDone(); }); });
+      }).catch(function () { btn.disabled = false; msg.textContent = '등록하지 못했습니다. 잠시 뒤 다시 시도해 주세요.'; });
+    });
+    return f;
+  }
+  // 로그인 안 함 / 로그인했지만 교인 등록 전 / 이용 중지 상태에 맞는 안내
+  function gateCard(why, compact) {
+    var g = el('div', 'gate');
+    if (!sb) { g.appendChild(el('p', 'lead', '지금은 로그인 기능을 불러오지 못했습니다. 화면을 새로 고쳐 주세요.')); return g; }
+    if (!signedIn()) {
+      g.appendChild(el('p', 'lead', why + ' 카카오로 로그인한 뒤, 처음 한 번만 교회 코드와 이름을 넣으면 됩니다.'));
+      g.appendChild(kakaoButton());
+      if (acct.loginError) { var m = el('p', 'msg', acct.loginError); g.appendChild(m); }
+      return g;
+    }
+    if (acct.me && acct.me.status === 'blocked') {
+      g.appendChild(el('p', 'lead', JOIN_ERRORS.blocked));
+      return g;
+    }
+    if (compact) {
+      g.appendChild(el('p', 'lead', why + ' 아래 나눔과 질문 자리에서 처음 한 번만 교인 등록을 해 주세요.'));
+      return g;
+    }
+    g.appendChild(el('p', 'lead', '처음 한 번만 교인 등록을 해 주세요. ' + why));
+    g.appendChild(joinForm(function () { render(); }));
+    return g;
+  }
+
+  /* ---------- shared posts ---------- */
+  var openReplies = {};
+  function timeOf(ts) {
+    var d = new Date(ts);
+    return (d.getMonth() + 1) + '월 ' + d.getDate() + '일 ' + d.toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' });
+  }
+  function twoStepDelete(btn, label, run) {
+    var armed = false, timer = null;
+    btn.textContent = label;
+    btn.addEventListener('click', function () {
+      if (!armed) {
+        armed = true; btn.textContent = '한 번 더 누르면 지워집니다'; btn.classList.add('warn');
+        timer = setTimeout(function () { armed = false; btn.textContent = label; btn.classList.remove('warn'); }, 4000);
+        return;
+      }
+      clearTimeout(timer); btn.disabled = true; run();
     });
   }
-  function writeArea(kind, label, placeholder, action, hint) {
-    var s = section('write', label);
+  function textForm(id, label, placeholder, action, onSubmit) {
     var form = el('form');
-    var id = kind + 'Input';
     var lab = el('label', 'sr', label); lab.htmlFor = id;
-    var ta = el('textarea'); ta.id = id; ta.placeholder = placeholder; ta.maxLength = 600;
-    var row = el('div', 'row');
-    var btn = el('button', 'btn', action); btn.type = 'submit';
-    row.appendChild(btn);
-    form.appendChild(lab); form.appendChild(ta); form.appendChild(row);
-    var list = el('ul', 'posts');
+    var ta = el('textarea'); ta.id = id; ta.placeholder = placeholder; ta.maxLength = 1000;
+    var row = el('div', 'row'); var btn = el('button', 'btn', action); btn.type = 'submit'; row.appendChild(btn);
+    var msg = el('p', 'msg'); msg.setAttribute('role', 'status');
+    form.appendChild(lab); form.appendChild(ta); form.appendChild(row); form.appendChild(msg);
     form.addEventListener('submit', function (ev) {
       ev.preventDefault();
       var v = ta.value.trim();
       if (!v) { ta.focus(); return; }
-      (mem[kind][current] = mem[kind][current] || []).push(v);
-      save(); ta.value = ''; postList(kind, list);
+      btn.disabled = true; msg.textContent = '';
+      onSubmit(v).then(function (ok) {
+        btn.disabled = false;
+        if (ok) { ta.value = ''; } else { msg.textContent = '올리지 못했습니다. 잠시 뒤 다시 시도해 주세요.'; }
+      });
     });
-    s.appendChild(form); s.appendChild(list);
-    if (hint) { s.appendChild(el('p', 'hint', hint)); }
-    postList(kind, list);
+    return form;
+  }
+  function loadPosts(day) {
+    return sb.from('posts')
+      .select('id,user_id,kind,body,created_at,members(name),replies(id,user_id,body,created_at,members(name))')
+      .eq('day', day).order('created_at', { ascending: true })
+      .then(function (r) { if (r.error) { throw r.error; } return r.data || []; });
+  }
+  function refreshPosts() {
+    var day = current;
+    var lists = { share: document.getElementById('shareList'), question: document.getElementById('questionList') };
+    if (!lists.share || !lists.question) { return Promise.resolve(); }
+    return loadPosts(day).then(function (rows) {
+      if (day !== current) { return; }
+      ['share', 'question'].forEach(function (kind) {
+        drawPosts(lists[kind], kind, rows.filter(function (p) { return p.kind === kind; }));
+      });
+    }).catch(function () {
+      ['share', 'question'].forEach(function (kind) {
+        lists[kind].textContent = '';
+        lists[kind].appendChild(el('li', 'empty', '글을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.'));
+      });
+    });
+  }
+  function drawPosts(listEl, kind, posts) {
+    listEl.textContent = '';
+    if (!posts.length) {
+      listEl.appendChild(el('li', 'empty', kind === 'share' ? '아직 나눔이 없습니다. 첫 나눔을 남겨 주세요.' : '아직 질문이 없습니다.'));
+      return;
+    }
+    posts.forEach(function (p) {
+      var li = el('li', 'post');
+      var meta = el('div', 'meta');
+      meta.appendChild(el('b', null, p.members ? p.members.name : '알 수 없음'));
+      meta.appendChild(el('span', null, timeOf(p.created_at)));
+      li.appendChild(meta);
+      li.appendChild(el('p', 'body', p.body));
+      var replies = (p.replies || []).slice().sort(function (a, b) { return a.created_at < b.created_at ? -1 : 1; });
+      var acts = el('div', 'acts');
+      var rb = el('button', null, replies.length ? '답글 ' + replies.length : '답글 달기'); rb.type = 'button';
+      acts.appendChild(rb);
+      if (p.user_id === myId() || isAdmin()) {
+        var db = el('button'); db.type = 'button';
+        twoStepDelete(db, '지우기', function () {
+          sb.from('posts').delete().eq('id', p.id).then(function () { refreshPosts(); });
+        });
+        acts.appendChild(db);
+      }
+      li.appendChild(acts);
+      var box = el('div', 'replies'); box.hidden = !openReplies[p.id];
+      rb.setAttribute('aria-expanded', String(!box.hidden));
+      rb.addEventListener('click', function () {
+        box.hidden = !box.hidden; openReplies[p.id] = !box.hidden;
+        rb.setAttribute('aria-expanded', String(!box.hidden));
+      });
+      var ul = el('ul');
+      replies.forEach(function (r) {
+        var ri = el('li', 'reply');
+        var rm = el('div', 'meta');
+        rm.appendChild(el('b', null, r.members ? r.members.name : '알 수 없음'));
+        rm.appendChild(el('span', null, timeOf(r.created_at)));
+        ri.appendChild(rm);
+        ri.appendChild(el('p', null, r.body));
+        if (r.user_id === myId() || isAdmin()) {
+          var rd = el('button', 'del'); rd.type = 'button';
+          twoStepDelete(rd, '지우기', function () {
+            sb.from('replies').delete().eq('id', r.id).then(function () { refreshPosts(); });
+          });
+          ri.appendChild(rd);
+        }
+        ul.appendChild(ri);
+      });
+      box.appendChild(ul);
+      box.appendChild(textForm('reply-' + p.id, '답글', '답글을 적어 주세요', '답글 남기기', function (v) {
+        return sb.from('replies').insert({ post_id: p.id, body: v }).then(function (r) {
+          if (r.error) { return false; }
+          openReplies[p.id] = true; refreshPosts(); return true;
+        });
+      }));
+      li.appendChild(box);
+      listEl.appendChild(li);
+    });
+  }
+  function postArea(kind, label, placeholder, action) {
+    var s = section('write', label);
+    s.appendChild(textForm(kind + 'Input', label, placeholder, action, function (v) {
+      return sb.from('posts').insert({ day: current, kind: kind, body: v }).then(function (r) {
+        if (r.error) { return false; }
+        refreshPosts(); return true;
+      });
+    }));
+    var list = el('ul', 'posts'); list.id = kind + 'List';
+    list.appendChild(el('li', 'empty', '불러오는 중입니다.'));
+    s.appendChild(list);
     return s;
+  }
+
+  /* ---------- read marks ---------- */
+  function syncReadsFromServer() {
+    if (!isMember()) { return Promise.resolve(); }
+    return sb.from('reads').select('day').then(function (r) {
+      if (r.error) { return; }
+      var server = {};
+      (r.data || []).forEach(function (x) { server[x.day] = true; });
+      var missing = Object.keys(mem.read).filter(function (d) { return mem.read[d] && !server[d] && byDate[d]; });
+      Object.keys(server).forEach(function (d) { mem.read[d] = true; });
+      save();
+      if (missing.length) {
+        return sb.from('reads').insert(missing.map(function (d) { return { day: d }; })).then(function () {});
+      }
+    }).catch(function () {});
+  }
+  function showTogether() {
+    var t = document.getElementById('together');
+    if (!t || !isMember()) { return; }
+    var day = current;
+    sb.rpc('read_count', { p_day: day }).then(function (r) {
+      if (day !== current || r.error || typeof r.data !== 'number') { return; }
+      t.textContent = r.data > 0 ? '이 날 함께 읽은 사람 ' + r.data + '명' : '';
+    });
+  }
+  function toggleRead() {
+    var day = current, on = !mem.read[day];
+    if (on) { mem.read[day] = true; } else { delete mem.read[day]; }
+    save(); syncRead(); renderWeek();
+    if (!isMember()) { return; }
+    var q = on ? sb.from('reads').insert({ day: day }) : sb.from('reads').delete().eq('day', day);
+    q.then(function () { showTogether(); });
+  }
+
+  /* ---------- account ---------- */
+  function renderAccount() {
+    view.token += 1;
+    var main = document.getElementById('main');
+    main.textContent = '';
+    document.getElementById('dock').hidden = true;
+    var hero = el('section', 'hero');
+    hero.appendChild(el('h1', null, '내 정보'));
+    var back = el('button', 'back', '오늘 본문으로 돌아가기'); back.type = 'button';
+    back.addEventListener('click', function () { go(current); });
+    hero.appendChild(back);
+    main.appendChild(hero);
+
+    if (!isMember()) {
+      var s0 = section('write', signedIn() ? '교인 등록' : '로그인');
+      s0.appendChild(gateCard('등록하면 나눔과 질문을 함께 보고, 앱에서 본문을 읽을 수 있습니다.'));
+      if (signedIn()) {
+        var so0 = el('button', 'btn', '로그아웃'); so0.type = 'button'; so0.style.marginTop = '14px';
+        so0.addEventListener('click', function () { sb.auth.signOut().then(function () { acct.session = null; acct.me = null; renderAccount(); }); });
+        s0.appendChild(so0);
+      }
+      main.appendChild(s0);
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    var s1 = section('write', '나눔에 보이는 이름');
+    var nf = el('form');
+    var fl = el('div', 'field'), lb = el('label', 'sr', '이름'), inp = el('input');
+    inp.id = 'myName'; lb.htmlFor = 'myName'; inp.maxLength = 20; inp.value = acct.me.name || '';
+    fl.appendChild(lb); fl.appendChild(inp);
+    var nb = el('button', 'btn', '이름 저장'); nb.type = 'submit';
+    var nm = el('p', 'msg'); nm.setAttribute('role', 'status');
+    nf.appendChild(fl); nf.appendChild(nb); nf.appendChild(nm);
+    nf.addEventListener('submit', function (ev) {
+      ev.preventDefault(); nm.className = 'msg'; nm.textContent = '';
+      sb.rpc('set_my_name', { p_name: inp.value }).then(function (r) {
+        var d = r.data || {};
+        if (r.error || !d.ok) { nm.textContent = JOIN_ERRORS[d.error] || '저장하지 못했습니다.'; return; }
+        acct.me.name = inp.value.trim(); nm.className = 'msg ok'; nm.textContent = '저장했습니다.';
+      });
+    });
+    s1.appendChild(nf);
+    main.appendChild(s1);
+
+    var s2 = section('write', '계정');
+    var row = el('div', 'acct-actions');
+    var so = el('button', 'btn', '로그아웃'); so.type = 'button';
+    so.addEventListener('click', function () { sb.auth.signOut().then(function () { acct.session = null; acct.me = null; renderAccount(); }); });
+    var lv = el('button', 'btn'); lv.type = 'button';
+    twoStepDelete(lv, '탈퇴하고 내 글 모두 지우기', function () {
+      sb.rpc('leave_church').then(function (r) {
+        if (r.error || !(r.data && r.data.ok)) { lv.disabled = false; return; }
+        mem.read = {}; save();
+        sb.auth.signOut().catch(function () {}).then(function () { acct.session = null; acct.me = null; renderAccount(); });
+      });
+    });
+    row.appendChild(so); row.appendChild(lv);
+    s2.appendChild(row);
+    s2.appendChild(el('p', 'hint', '탈퇴하면 교인 등록, 남긴 나눔과 질문과 답글, 읽음 표시가 바로 지워지고 되돌릴 수 없습니다.'));
+    main.appendChild(s2);
+
+    if (isAdmin()) { renderAdmin(main); }
+    window.scrollTo(0, 0);
+  }
+  function renderAdmin(main) {
+    var s3 = section('write', '교회 코드 바꾸기');
+    var cf = el('form');
+    var fl = el('div', 'field'), lb = el('label', 'sr', '새 교회 코드'), inp = el('input');
+    inp.id = 'newCode'; lb.htmlFor = 'newCode'; inp.maxLength = 30; inp.autocomplete = 'off'; inp.placeholder = '4자에서 30자';
+    fl.appendChild(lb); fl.appendChild(inp);
+    var cb = el('button', 'btn', '코드 바꾸기'); cb.type = 'submit';
+    var cm = el('p', 'msg'); cm.setAttribute('role', 'status');
+    cf.appendChild(fl); cf.appendChild(cb); cf.appendChild(cm);
+    cf.addEventListener('submit', function (ev) {
+      ev.preventDefault(); cm.className = 'msg'; cm.textContent = '';
+      sb.rpc('admin_set_join_code', { p_code: inp.value }).then(function (r) {
+        var d = r.data || {};
+        if (r.error || !d.ok) { cm.textContent = d.error === 'bad_code' ? '코드는 4자에서 30자로 정해 주세요.' : '바꾸지 못했습니다.'; return; }
+        inp.value = ''; cm.className = 'msg ok'; cm.textContent = '바꿨습니다. 이미 등록한 교인은 그대로이고, 새로 등록하는 사람만 새 코드를 씁니다.';
+      });
+    });
+    s3.appendChild(cf);
+    main.appendChild(s3);
+
+    var s4 = section('write', '교인 명단');
+    var ul = el('ul', 'member-list');
+    s4.appendChild(ul);
+    main.appendChild(s4);
+    function draw() {
+      sb.from('members').select('user_id,name,role,status,joined_at').order('joined_at', { ascending: true }).then(function (r) {
+        ul.textContent = '';
+        if (r.error) { ul.appendChild(el('li', null, '명단을 불러오지 못했습니다.')); return; }
+        r.data.forEach(function (m) {
+          var li = el('li');
+          var n = el('span', 'n', m.name);
+          li.appendChild(n);
+          var st = (m.role === 'admin' ? '관리자 · ' : '') + (m.status === 'blocked' ? '이용 중지' : (new Date(m.joined_at).getMonth() + 1) + '월 ' + new Date(m.joined_at).getDate() + '일 등록');
+          li.appendChild(el('span', 's', st));
+          if (m.user_id !== myId()) {
+            var b = el('button', null, m.status === 'blocked' ? '다시 허용' : '이용 중지'); b.type = 'button';
+            b.addEventListener('click', function () {
+              b.disabled = true;
+              sb.rpc('admin_update_member', { p_user: m.user_id, p_status: m.status === 'blocked' ? 'active' : 'blocked' }).then(draw);
+            });
+            li.appendChild(b);
+          } else { li.appendChild(el('span', 's', '나')); }
+          ul.appendChild(li);
+        });
+      });
+    }
+    draw();
   }
 
   function renderReading(day) {
@@ -600,6 +1031,8 @@ main>section+section{border-top:1px solid var(--rule)}
     bar.appendChild(fill); pr.appendChild(bar);
     pr.appendChild(el('span', null, plan.meta.totalDays + '일 가운데 ' + day.n + '일째'));
     hero.appendChild(pr);
+    var tog = el('p', 'together'); tog.id = 'together'; tog.setAttribute('aria-live', 'polite');
+    hero.appendChild(tog);
     main.appendChild(hero);
 
     var g = el('section', 'guide');
@@ -629,7 +1062,10 @@ main>section+section{border-top:1px solid var(--rule)}
     inv.appendChild(tg);
     sc.appendChild(inv);
     var wrap = el('div'); wrap.id = 'textBody';
-    if (day.chapters.length > 1) {
+    if (!isMember()) {
+      wrap.appendChild(el('div', 'passage'));
+      wrap.lastChild.appendChild(gateCard('앱 안의 본문은 교인 등록을 한 분께만 보입니다.', true));
+    } else if (day.chapters.length > 1) {
       var same = day.chapters.every(function (c) { return c.book === day.chapters[0].book; });
       var tabs = el('div', 'tabs'); tabs.id = 'tabs';
       tabs.setAttribute('role', 'group'); tabs.setAttribute('aria-label', '장 고르기');
@@ -642,7 +1078,7 @@ main>section+section{border-top:1px solid var(--rule)}
       wrap.appendChild(tabs);
     }
     var host = el('div', 'passage'); host.id = 'passage'; host.setAttribute('aria-live', 'polite');
-    wrap.appendChild(host);
+    if (isMember()) { wrap.appendChild(host); }
     sc.appendChild(wrap);
     syncTextToggle = function () {
       wrap.hidden = !mem.textOpen;
@@ -652,7 +1088,7 @@ main>section+section{border-top:1px solid var(--rule)}
     tg.setAttribute('aria-controls', 'textBody');
     tg.addEventListener('click', function () {
       mem.textOpen = !mem.textOpen; save(); syncTextToggle();
-      if (mem.textOpen && !host.firstChild) { showPassage(day, false); }
+      if (mem.textOpen && isMember() && !host.firstChild) { showPassage(day, false); }
     });
     syncTextToggle();
     main.appendChild(sc);
@@ -680,12 +1116,18 @@ main>section+section{border-top:1px solid var(--rule)}
       main.appendChild(x);
     }
 
-    main.appendChild(writeArea('shares', '한 줄 나눔', '오늘 읽으며 마음에 남은 것을 적어 주세요', '나눔 남기기',
-      '실제 앱에서는 함께 읽는 성도들의 나눔이 이 자리에 모입니다.'));
-    main.appendChild(writeArea('questions', '궁금한 것 묻기', '본문을 읽다가 궁금한 점을 적어 주세요', '질문 남기기',
-      '실제 앱에서는 질문이 목사님께 전해집니다.'));
+    if (isMember()) {
+      main.appendChild(postArea('share', '한 줄 나눔', '오늘 읽으며 마음에 남은 것을 적어 주세요', '나눔 남기기'));
+      main.appendChild(postArea('question', '궁금한 것 묻기', '본문을 읽다가 궁금한 점을 적어 주세요', '질문 남기기'));
+      refreshPosts();
+      showTogether();
+    } else {
+      var gs = section('write', '나눔과 질문');
+      gs.appendChild(gateCard('함께 읽는 교인들의 나눔과 질문은 교인 등록을 한 분께만 보입니다.'));
+      main.appendChild(gs);
+    }
 
-    if (mem.textOpen) { showPassage(day, false); }
+    if (mem.textOpen && isMember()) { showPassage(day, false); }
   }
 
   /* ---------- Sunday ---------- */
@@ -759,16 +1201,14 @@ main>section+section{border-top:1px solid var(--rule)}
   function start() {
     plan.days.forEach(function (d) { byDate[d.date] = d; order.push(d.date); });
     var today = iso(new Date());
-    var first = fromHash() || (byDate[today] ? today : order[0]);
+    var first = returnDay() || fromHash() || (byDate[today] ? today : order[0]);
     document.getElementById('prev').addEventListener('click', step.bind(null, -1));
     document.getElementById('next').addEventListener('click', step.bind(null, 1));
     document.getElementById('size').addEventListener('click', function () {
       mem.size = (mem.size + 1) % SIZES.length; save(); applySize();
     });
-    document.getElementById('readBtn').addEventListener('click', function () {
-      if (mem.read[current]) { delete mem.read[current]; } else { mem.read[current] = true; }
-      save(); syncRead(); renderWeek();
-    });
+    document.getElementById('readBtn').addEventListener('click', toggleRead);
+    document.getElementById('acctBtn').addEventListener('click', renderAccount);
     window.addEventListener('hashchange', function () {
       var s = fromHash(); if (s && s !== current) { go(s); }
     });
@@ -776,9 +1216,14 @@ main>section+section{border-top:1px solid var(--rule)}
   }
 
   load(); applySize();
+  var authReady = initAuth().catch(function () {});
   fetch('data/january.json', { cache: 'no-cache' })
     .then(function (r) { if (!r.ok) { throw new Error('plan'); } return r.json(); })
-    .then(function (p) { plan = p; start(); })
+    .then(function (p) { plan = p; return authReady; })
+    .then(function () {
+      start();
+      syncReadsFromServer().then(function () { if (byDate[current] && byDate[current].type !== 'sunday') { syncRead(); } renderWeek(); });
+    })
     .catch(function () {
       var main = document.getElementById('main');
       main.textContent = '';

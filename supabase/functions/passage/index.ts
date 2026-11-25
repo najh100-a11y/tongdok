@@ -40,26 +40,51 @@ function json(body: unknown, status = 200, extra: Record<string, string> = {}): 
   });
 }
 
-// 앱의 공개 키(publishable 또는 기존 anon)를 확인한다.
-// 출시 전에 교인 로그인(사용자 JWT) 확인으로 바꿀 자리다.
-function callerAllowed(req: Request): boolean {
-  const keys = new Set<string>();
+// 교인만 본문을 받는다. 앱은 로그인한 사람의 토큰(JWT)을 Authorization 헤더로 보낸다.
+// 토큰을 그대로 실어 데이터베이스의 is_member()를 부르면, 토큰이 가짜거나 만료됐거나
+// 교인이 아니면(차단 포함) true가 나오지 않는다. 결과는 토큰별로 몇 분만 기억한다.
+const memberCache = new Map<string, number>(); // token -> 확인 시각(ms)
+const MEMBER_TTL_MS = 5 * 60 * 1000;
+
+function publishableKey(req: Request): string {
+  const fromReq = req.headers.get("apikey") ?? "";
+  if (fromReq) return fromReq;
   const named = Deno.env.get("SUPABASE_PUBLISHABLE_KEYS");
   if (named) {
     try {
-      for (const v of Object.values(JSON.parse(named))) {
-        if (typeof v === "string" && v) keys.add(v);
-      }
-    } catch (_) { /* 형식이 다르면 아래 단일 키만 본다 */ }
+      for (const v of Object.values(JSON.parse(named))) if (typeof v === "string" && v) return v;
+    } catch (_) { /* fall through */ }
   }
-  for (const name of ["SUPABASE_PUBLISHABLE_KEY", "SUPABASE_ANON_KEY"]) {
-    const v = Deno.env.get(name);
-    if (v) keys.add(v);
+  return Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+}
+
+async function isMember(req: Request): Promise<boolean> {
+  const token = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+  if (!token || token.startsWith("sb_")) return false; // 공개 키만으로는 안 된다
+  const seen = memberCache.get(token);
+  if (seen && Date.now() - seen < MEMBER_TTL_MS) return true;
+  const base = Deno.env.get("SUPABASE_URL") ?? "";
+  try {
+    const r = await fetch(`${base}/rest/v1/rpc/is_member`, {
+      method: "POST",
+      headers: {
+        "apikey": publishableKey(req),
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: "{}",
+      signal: AbortSignal.timeout(5_000),
+    });
+    if (!r.ok) return false;
+    const ok = (await r.json()) === true;
+    if (ok) {
+      if (memberCache.size > 500) memberCache.clear();
+      memberCache.set(token, Date.now());
+    }
+    return ok;
+  } catch (_) {
+    return false;
   }
-  if (keys.size === 0) return false;
-  const apikey = req.headers.get("apikey") ?? "";
-  const bearer = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
-  return keys.has(apikey) || keys.has(bearer);
 }
 
 type Meta = { copyright: string; title: string; abbreviation: string; publisher: string; at: number };
@@ -91,7 +116,7 @@ async function bibleMeta(key: string): Promise<Meta | null> {
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (req.method !== "GET") return json({ code: "method_not_allowed" }, 405, { Allow: "GET, OPTIONS" });
-  if (!callerAllowed(req)) return json({ code: "unauthorized" }, 401);
+  if (!(await isMember(req))) return json({ code: "unauthorized" }, 401);
 
   const key = (Deno.env.get("YVP_APP_KEY") ?? "").trim();
   if (!key) return json({ code: "not_configured", message: "YVP_APP_KEY가 아직 설정되지 않았습니다." }, 503);
