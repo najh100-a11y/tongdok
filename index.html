@@ -143,7 +143,6 @@ main>section+section{border-top:1px solid var(--rule)}
 .extra h3{margin:0 0 8px;font-family:var(--font-read);font-synthesis:none;font-weight:400;font-size:1.125rem}
 .extra .src{margin-top:12px;font-size:.8125rem;line-height:1.7;color:var(--ink-soft)}
 .extra .src a{color:inherit;text-underline-offset:3px}
-.pilot{margin-left:6px;font-weight:500;color:var(--ink-soft)}
 
 /* writing areas */
 .write textarea{display:block;width:100%;min-height:92px;padding:12px 14px;border:1px solid var(--rule);border-radius:14px;background:var(--surface);resize:vertical;font-size:1rem;line-height:1.6}
@@ -669,7 +668,7 @@ main>section+section{border-top:1px solid var(--rule)}
 
     if (day.extra) {
       var x = el('section', 'extra');
-      var xl = el('h2', 'label', '읽을거리'); xl.appendChild(el('span', 'pilot', '시범')); x.appendChild(xl);
+      x.appendChild(el('h2', 'label', '읽을거리'));
       x.appendChild(el('h3', null, day.extra.title));
       var xb = el('div', 'read'); xb.appendChild(el('p', null, day.extra.body)); x.appendChild(xb);
       var src = el('p', 'src', '출처 ');
