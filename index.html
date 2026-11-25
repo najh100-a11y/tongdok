@@ -457,18 +457,22 @@ main>section+section{border-top:1px solid var(--rule)}
       '주소창 오른쪽의 설치 아이콘을 누르거나, 브라우저 메뉴에서 "앱 설치" 항목을 찾아 누릅니다.'
     ]));
   }
-  function installCard(withLater) {
-    var box = el('div', 'install'); box.setAttribute('data-install', withLater ? 'top' : 'acct');
+  function installCard(where) {
+    if (where === true) { where = 'top'; } else if (where === false || !where) { where = 'acct'; }
+    var withLater = where === 'top' || (where === 'intro' && !ENV.kakao);
+    var box = el('div', 'install'); box.setAttribute('data-install', where);
     var head = el('div', 'head');
     var img = el('img'); img.src = 'icons/icon-192.png'; img.alt = '';
     var tx = el('div');
     tx.appendChild(el('b', null, '앱으로 설치하기'));
-    tx.appendChild(el('span', null, '홈 화면에 두면 날마다 앱처럼 바로 열 수 있습니다.'));
+    tx.appendChild(el('span', null, ENV.mobile || ENV.kakao ? '홈 화면에 두면 날마다 앱처럼 바로 열 수 있습니다.' : '바탕 화면이나 작업 표시줄에 두고 날마다 앱처럼 바로 열 수 있습니다.'));
     head.appendChild(img); head.appendChild(tx);
     box.appendChild(head);
     installBody(box);
     if (!ENV.kakao) {
-      box.appendChild(el('p', 'hint', '설치한 앱을 처음 열 때 카카오 로그인을 한 번 더 해야 할 수 있습니다.'));
+      box.appendChild(el('p', 'hint', where === 'intro'
+        ? '설치한 뒤에는 ' + (ENV.mobile ? '홈 화면에 생긴' : '설치된') + ' 앱을 열어 그 안에서 로그인해 주세요. 브라우저에서 먼저 로그인했다면 앱에서 한 번 더 로그인해야 할 수 있습니다.'
+        : '설치한 앱을 처음 열 때 카카오 로그인을 한 번 더 해야 할 수 있습니다.'));
     }
     if (withLater) {
       var row = el('div', 'row2');
@@ -482,10 +486,11 @@ main>section+section{border-top:1px solid var(--rule)}
   }
   function refreshInstallCards() {
     Array.prototype.forEach.call(document.querySelectorAll('[data-install]'), function (old) {
-      var top = old.getAttribute('data-install') === 'top';
-      if (top && !installCardWanted()) { old.remove(); return; }
-      if (!top && standalone()) { old.remove(); return; }
-      old.parentNode.replaceChild(installCard(top), old);
+      var where = old.getAttribute('data-install');
+      if (where !== 'acct' && !installCardWanted()) { old.remove(); return; }
+      if (where === 'acct' && standalone()) { old.remove(); return; }
+      var fresh = installCard(where); fresh.style.cssText = old.style.cssText;
+      old.parentNode.replaceChild(fresh, old);
     });
   }
 
@@ -1090,6 +1095,7 @@ main>section+section{border-top:1px solid var(--rule)}
     body.appendChild(el('p', null, '성경은 하나님께서 왕으로 다스리시는 나라를 향해 흘러가는 한 편의 이야기입니다. 2027년 한 해 동안 진실한숲교회는 이 이야기를 함께 읽고, 묻고, 배우려고 합니다. 그 자리에 여러분을 초대합니다.'));
     body.appendChild(el('p', null, '1월에는 복음서에서 왕이 오신 이야기를 먼저 듣습니다. 2월부터는 창조로 돌아가, 그 나라가 어떻게 약속되고 이루어져 왔는지를 따라 읽습니다.'));
     s.appendChild(body);
+    if (installCardWanted()) { s.appendChild(installCard('intro')); s.lastChild.style.marginTop = '26px'; }
     main.appendChild(s);
 
     var how = section('how', '이렇게 읽습니다');
@@ -1102,7 +1108,6 @@ main>section+section{border-top:1px solid var(--rule)}
     main.appendChild(how);
 
     var join = section('join-area', '함께하기');
-    if (ENV.kakao && installCardWanted()) { join.appendChild(installCard(false)); join.lastChild.style.margin = '0 0 18px'; }
     if (!sb) {
       join.appendChild(el('p', 'lead', '지금은 로그인 기능을 불러오지 못했습니다. 화면을 새로 고쳐 주세요.'));
     } else if (!signedIn()) {
