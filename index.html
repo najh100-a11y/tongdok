@@ -196,6 +196,16 @@ main>section+section{border-top:1px solid var(--rule)}
 .msg{margin:10px 0 0;font-size:.875rem;line-height:1.6;color:#A1422F;word-break:keep-all}
 .msg.ok{color:var(--leaf)}
 .acct-actions{display:flex;flex-wrap:wrap;gap:10px}
+.q-head{margin:18px 0 8px;font-size:.875rem;font-weight:600;color:var(--ink)}
+.q-head:first-child{margin-top:0}
+.q-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.q-item{display:grid;gap:4px;width:100%;padding:12px 14px;border:1px solid var(--rule);border-radius:12px;background:var(--surface);text-align:left;color:var(--ink);font:inherit}
+.q-item .q-top{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:.75rem;color:var(--ink-soft)}
+.q-item .q-top b{font-size:.8125rem;font-weight:600;color:var(--leaf)}
+.q-item .q-body{font-size:.9375rem;line-height:1.55;word-break:keep-all;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.q-item .q-state{font-size:.75rem;color:var(--ink-soft)}
+.q-item .q-state.wait{color:#A1422F;font-weight:600}
+.posts li.post.focus{border-color:var(--leaf);box-shadow:0 0 0 1px var(--leaf)}
 .member-list{list-style:none;margin:0;padding:0}
 .member-list li{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--rule)}
 .member-list li:last-child{border-bottom:0}
@@ -299,6 +309,8 @@ main>section+section{border-top:1px solid var(--rule)}
   // 본문은 Supabase 함수(passage)를 거쳐 한 장씩 받아 온다. 아래 키는 공개용(publishable) 키다.
   var FN_URL = 'https://khxwbstnhiimwcdchtjy.supabase.co/functions/v1/passage';
   var FN_KEY = 'sb_publishable_guI7qU59guL54deM5ukSTQ_NNkQX8hZ';
+  // 새 질문 알림(웹 푸시). 관리자 기기만 등록한다.
+  var PUSH_URL = 'https://khxwbstnhiimwcdchtjy.supabase.co/functions/v1/push';
   var BIBLICA_URL = 'https://www.biblica.com/';
   var LINK_VERSIONS = [
     { id: 86, code: 'KLB', name: '현대인의 성경' },
@@ -915,6 +927,7 @@ main>section+section{border-top:1px solid var(--rule)}
 
   /* ---------- shared posts ---------- */
   var openReplies = {};
+  var pendingFocus = null; // 알림이나 질문 모아 보기에서 연 질문 번호
   function timeOf(ts) {
     var d = new Date(ts);
     return (d.getMonth() + 1) + '월 ' + d.getDate() + '일 ' + d.toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' });
@@ -965,6 +978,12 @@ main>section+section{border-top:1px solid var(--rule)}
       ['share', 'question'].forEach(function (kind) {
         drawPosts(lists[kind], kind, rows.filter(function (p) { return p.kind === kind; }));
       });
+      var f = pendingFocus; pendingFocus = null;
+      var t = f ? document.getElementById('post-' + f) : null;
+      if (t) {
+        t.classList.add('focus');
+        try { t.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { t.scrollIntoView(); }
+      }
     }).catch(function () {
       ['share', 'question'].forEach(function (kind) {
         lists[kind].textContent = '';
@@ -979,7 +998,7 @@ main>section+section{border-top:1px solid var(--rule)}
       return;
     }
     posts.forEach(function (p) {
-      var li = el('li', 'post');
+      var li = el('li', 'post'); li.id = 'post-' + p.id;
       var meta = el('div', 'meta');
       meta.appendChild(el('b', null, p.members ? p.members.name : '알 수 없음'));
       meta.appendChild(el('span', null, timeOf(p.created_at)));
@@ -1207,6 +1226,8 @@ main>section+section{border-top:1px solid var(--rule)}
     window.scrollTo(0, 0);
   }
   function renderAdmin(main) {
+    main.appendChild(questionBoard());
+    main.appendChild(pushSettings());
     var s3 = section('write', '교회 코드 바꾸기');
     var cf = el('form');
     var fl = el('div', 'field'), lb = el('label', 'sr', '새 교회 코드'), inp = el('input');
@@ -1253,6 +1274,161 @@ main>section+section{border-top:1px solid var(--rule)}
       });
     }
     draw();
+  }
+
+  /* ---------- admin: every question in one place ---------- */
+  function shortDate(isoStr) { var d = parse(isoStr); return (d.getMonth() + 1) + '월 ' + d.getDate() + '일'; }
+  function openQuestion(id, day) {
+    if (!byDate[day]) { return; }
+    openReplies[id] = true; pendingFocus = id;
+    go(day);
+  }
+  function questionItem(q) {
+    var li = el('li');
+    var b = el('button', 'q-item'); b.type = 'button';
+    var top = el('span', 'q-top');
+    top.appendChild(el('b', null, shortDate(q.day) + ' 본문'));
+    top.appendChild(el('span', null, (q.members ? q.members.name : '알 수 없음') + ' · ' + timeOf(q.created_at)));
+    b.appendChild(top);
+    b.appendChild(el('span', 'q-body', q.body));
+    var n = (q.replies || []).length;
+    b.appendChild(el('span', 'q-state' + (n ? '' : ' wait'), n ? '답글 ' + n : '답글 없음'));
+    b.addEventListener('click', function () { openQuestion(q.id, q.day); });
+    li.appendChild(b);
+    return li;
+  }
+  function questionBoard() {
+    var s = section('write', '질문 모아 보기');
+    var box = el('div', 'q-board');
+    box.appendChild(el('p', 'hint', '불러오는 중입니다.'));
+    s.appendChild(box);
+    sb.from('posts').select('id,day,body,created_at,members(name),replies(id)')
+      .eq('kind', 'question').order('created_at', { ascending: false }).limit(300)
+      .then(function (r) {
+        box.textContent = '';
+        if (r.error) { box.appendChild(el('p', 'hint', '질문을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.')); return; }
+        var rows = r.data || [];
+        if (!rows.length) { box.appendChild(el('p', 'hint', '아직 올라온 질문이 없습니다.')); return; }
+        var waiting = rows.filter(function (q) { return !(q.replies || []).length; });
+        var answered = rows.filter(function (q) { return (q.replies || []).length; });
+        box.appendChild(el('h3', 'q-head', waiting.length ? '답글을 기다리는 질문 ' + waiting.length + '개' : '답글을 기다리는 질문이 없습니다.'));
+        if (waiting.length) {
+          var ul1 = el('ul', 'q-list'); waiting.forEach(function (q) { ul1.appendChild(questionItem(q)); }); box.appendChild(ul1);
+        }
+        if (answered.length) {
+          box.appendChild(el('h3', 'q-head', '답글이 달린 질문 ' + answered.length + '개'));
+          var ul2 = el('ul', 'q-list'); answered.forEach(function (q) { ul2.appendChild(questionItem(q)); }); box.appendChild(ul2);
+        }
+        box.appendChild(el('p', 'hint', '질문을 누르면 그날 화면으로 가서 바로 답글을 달 수 있습니다. 최근 질문부터 보입니다.'));
+      });
+    return s;
+  }
+
+  /* ---------- admin: new-question alerts (web push) ----------
+     Free, standard web push. Android Chrome works from the browser or the installed app;
+     iPhone and iPad only from the app added to the Home Screen (iOS 16.4 or later). */
+  function pushSupported() {
+    return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  }
+  function b64urlBytes(s) {
+    var p = s.replace(/-/g, '+').replace(/_/g, '/'); while (p.length % 4) { p += '='; }
+    var raw = window.atob(p), out = new Uint8Array(raw.length);
+    for (var i = 0; i < raw.length; i++) { out[i] = raw.charCodeAt(i); }
+    return out;
+  }
+  function pushKey() {
+    return fetch(PUSH_URL, { headers: { apikey: FN_KEY } })
+      .then(function (r) { if (!r.ok) { throw new Error('key'); } return r.json(); })
+      .then(function (j) { if (!j.publicKey) { throw new Error('key'); } return j.publicKey; });
+  }
+  function currentSub() {
+    return navigator.serviceWorker.ready.then(function (reg) { return reg.pushManager.getSubscription(); });
+  }
+  function pushSettings() {
+    var s = section('write', '새 질문 알림');
+    var lead = el('p', 'hint', '교인이 질문을 남기면 이 기기로 알림이 옵니다. 알림을 누르면 그 질문이 있는 날로 바로 갑니다. 비용은 들지 않습니다.');
+    lead.style.marginTop = '0';
+    s.appendChild(lead);
+    var msg = el('p', 'msg'); msg.setAttribute('role', 'status');
+    if (!pushSupported()) {
+      msg.textContent = ENV.ios && !standalone()
+        ? '아이폰과 아이패드는 이 앱을 홈 화면에 추가한 뒤, 홈 화면의 앱을 열어 여기서 알림을 켤 수 있습니다(iOS 16.4 이상).'
+        : (ENV.kakao ? '카카오톡 안에서 연 화면에서는 알림을 켤 수 없습니다. 휴대폰의 기본 브라우저나 홈 화면의 앱에서 열어 주세요.'
+          : '이 브라우저에서는 알림을 켤 수 없습니다. 휴대폰의 크롬이나 홈 화면의 앱에서 열어 주세요.');
+      s.appendChild(msg);
+      return s;
+    }
+    var row = el('div', 'acct-actions');
+    var onBtn = el('button', 'btn'); onBtn.type = 'button';
+    var testBtn = el('button', 'btn', '시험 알림 보내기'); testBtn.type = 'button';
+    row.appendChild(onBtn); row.appendChild(testBtn);
+    s.appendChild(row); s.appendChild(msg);
+    var on = false;
+    function draw() {
+      onBtn.textContent = on ? '이 기기 알림 끄기' : '이 기기에서 알림 받기';
+      testBtn.hidden = !on;
+      onBtn.disabled = false; testBtn.disabled = false;
+    }
+    function say(text, ok) { msg.className = ok ? 'msg ok' : 'msg'; msg.textContent = text; }
+    onBtn.disabled = true; testBtn.hidden = true; onBtn.textContent = '확인하는 중';
+    currentSub().then(function (sub) {
+      if (!sub) { return false; }
+      return sb.rpc('my_push_on', { p_endpoint: sub.endpoint }).then(function (r) { return !r.error && r.data === true; });
+    }).catch(function () { return false; }).then(function (v) {
+      on = !!v; draw();
+      if (!on && Notification.permission === 'denied') {
+        say('이 기기에서 이 앱의 알림이 꺼져 있습니다. 휴대폰 설정에서 알림을 허용한 뒤 다시 눌러 주세요.');
+      }
+    });
+    onBtn.addEventListener('click', function () {
+      onBtn.disabled = true; say('');
+      if (on) {
+        currentSub().then(function (sub) {
+          if (!sub) { return null; }
+          return sb.rpc('delete_my_push', { p_endpoint: sub.endpoint }).then(function () { return sub.unsubscribe(); });
+        }).then(function () { on = false; draw(); say('이 기기의 알림을 껐습니다.', true); })
+          .catch(function () { draw(); say('알림을 끄지 못했습니다. 잠시 뒤 다시 시도해 주세요.'); });
+        return;
+      }
+      var asked;
+      try { asked = Notification.requestPermission(); } catch (e) { asked = null; }
+      Promise.resolve(asked).then(function (perm) {
+        if ((perm || Notification.permission) !== 'granted') { throw new Error('perm'); }
+        return Promise.all([navigator.serviceWorker.ready, pushKey()]);
+      }).then(function (a) {
+        return a[0].pushManager.getSubscription().then(function (old) {
+          return old || a[0].pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64urlBytes(a[1]) });
+        });
+      }).then(function (sub) {
+        var j = sub.toJSON();
+        return sb.rpc('admin_save_push', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth });
+      }).then(function (r) {
+        if (r.error || !(r.data && r.data.ok)) { throw new Error('save'); }
+        on = true; draw(); say('이 기기에서 새 질문 알림을 받습니다. 시험 알림으로 한 번 확인해 보세요.', true);
+      }).catch(function (e) {
+        draw();
+        say(e && e.message === 'perm'
+          ? '알림을 허용하지 않아 켜지 못했습니다. 휴대폰 설정에서 이 앱의 알림을 허용한 뒤 다시 눌러 주세요.'
+          : '알림을 켜지 못했습니다. 잠시 뒤 다시 시도해 주세요.');
+      });
+    });
+    testBtn.addEventListener('click', function () {
+      testBtn.disabled = true; say('');
+      sb.auth.getSession().then(function (r) {
+        var token = r.data && r.data.session ? r.data.session.access_token : '';
+        return fetch(PUSH_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', apikey: FN_KEY, Authorization: 'Bearer ' + token },
+          body: JSON.stringify({ test: true })
+        });
+      }).then(function (r) { return r.json(); }).then(function (j) {
+        testBtn.disabled = false;
+        if (j.ok) { say('시험 알림을 보냈습니다. 몇 초 안에 알림이 오는지 확인해 주세요.', true); }
+        else if (j.error === 'no_subs') { on = false; draw(); say('이 기기가 등록되어 있지 않습니다. 알림 받기를 다시 눌러 주세요.'); }
+        else { say('시험 알림을 보내지 못했습니다. 잠시 뒤 다시 시도해 주세요.'); }
+      }).catch(function () { testBtn.disabled = false; say('시험 알림을 보내지 못했습니다. 잠시 뒤 다시 시도해 주세요.'); });
+    });
+    return s;
   }
 
   function renderReading(day) {
@@ -1440,6 +1616,11 @@ main>section+section{border-top:1px solid var(--rule)}
   function start() {
     plan.days.forEach(function (d) { byDate[d.date] = d; order.push(d.date); });
     var today = iso(new Date());
+    var qm = /[?&]q=(\d+)/.exec(window.location.search || '');
+    if (qm) {
+      pendingFocus = Number(qm[1]); openReplies[pendingFocus] = true;
+      try { window.history.replaceState(null, '', window.location.pathname + window.location.hash); } catch (e) { /* ignore */ }
+    }
     var first = returnDay() || fromHash() || (byDate[today] ? today : order[0]);
     document.getElementById('prev').addEventListener('click', step.bind(null, -1));
     document.getElementById('next').addEventListener('click', step.bind(null, 1));
@@ -1457,6 +1638,16 @@ main>section+section{border-top:1px solid var(--rule)}
   load(); applySize();
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+    // 앱이 열려 있을 때 알림을 누르면 서비스 워커가 이 메시지로 그 질문을 연다.
+    navigator.serviceWorker.addEventListener('message', function (ev) {
+      var d = ev.data || {};
+      if (d.type !== 'open' || !d.url || !plan) { return; }
+      var u; try { u = new URL(d.url); } catch (e) { return; }
+      var q = /[?&]q=(\d+)/.exec(u.search), m = /^#d-(\d\d)(\d\d)$/.exec(u.hash);
+      var day = m ? '2027-' + m[1] + '-' + m[2] : null;
+      if (q) { pendingFocus = Number(q[1]); openReplies[pendingFocus] = true; }
+      if (day && byDate[day]) { go(day); }
+    });
   }
   var authReady = initAuth().catch(function () {});
   fetch('data/2027.json', { cache: 'no-cache' })

@@ -3,7 +3,7 @@
 // 성경 본문(Supabase 함수)과 로그인, 나눔 요청은 다른 출처라 손대지 않고 그대로 통과시킨다.
 // 그래서 현대인의 성경 본문은 기기에 저장되지 않는다.
 
-const CACHE = 'tongdok-shell-v2';
+const CACHE = 'tongdok-shell-v3';
 const SHELL = [
   './',
   'manifest.webmanifest',
@@ -65,4 +65,32 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   event.respondWith(cacheFirst(req));
+});
+
+// 새 질문 알림(웹 푸시). push 함수가 보낸 제목, 내용, 열 주소를 그대로 보여 준다.
+self.addEventListener('push', (event) => {
+  let d = {};
+  try { d = event.data ? event.data.json() : {}; } catch (e) { d = { body: event.data ? event.data.text() : '' }; }
+  event.waitUntil(self.registration.showNotification(d.title || '진실한숲 통독', {
+    body: d.body || '',
+    icon: 'icons/icon-192.png',
+    tag: d.tag || undefined,
+    data: { url: d.url || './' }
+  }));
+});
+
+// 알림을 누르면: 열려 있는 앱이 있으면 그 화면에서 질문을 열고, 없으면 새로 연다.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = new URL((event.notification.data && event.notification.data.url) || './', self.registration.scope).href;
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      const win = list.find((c) => c.url.startsWith(self.registration.scope));
+      if (win) {
+        win.postMessage({ type: 'open', url });
+        return win.focus();
+      }
+      return self.clients.openWindow(url);
+    })
+  );
 });
